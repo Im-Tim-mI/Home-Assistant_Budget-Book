@@ -4,7 +4,21 @@
 
 Home Assistant 自訂整合，提供側邊欄記帳面板、收支統計、分類預算、固定支出與資料匯入匯出功能。資料儲存在 Home Assistant storage，會跟著 HA 備份一起保存。
 
-![記帳本軟體畫面](docs/images/screenshot-overview.png)
+## 軟體截圖
+
+### 桌面版
+
+| 總覽 | 交易 |
+| --- | --- |
+| ![總覽畫面](docs/images/screenshot-overview.png) | ![交易畫面](docs/images/screenshot-transactions.png) |
+
+| 圖表 | 預算 |
+| --- | --- |
+| ![圖表畫面](docs/images/screenshot-charts.png) | ![預算畫面](docs/images/screenshot-budgets.png) |
+
+### 手機版
+
+![手機總覽畫面](docs/images/screenshot-mobile-overview.png)
 
 ## 功能
 

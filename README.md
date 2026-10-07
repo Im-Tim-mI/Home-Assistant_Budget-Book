@@ -4,7 +4,21 @@
 
 A Home Assistant custom integration that adds a sidebar budgeting panel with transaction tracking, income and expense summaries, category budgets, recurring expenses, and JSON import/export. Data is stored in Home Assistant storage, so it is included with your regular HA backups.
 
-![Budget Book screenshot](docs/images/screenshot-overview.png)
+## Screenshots
+
+### Desktop
+
+| Overview | Transactions |
+| --- | --- |
+| ![Overview screen](docs/images/screenshot-overview.png) | ![Transactions screen](docs/images/screenshot-transactions.png) |
+
+| Charts | Budgets |
+| --- | --- |
+| ![Charts screen](docs/images/screenshot-charts.png) | ![Budgets screen](docs/images/screenshot-budgets.png) |
+
+### Mobile
+
+![Mobile overview screen](docs/images/screenshot-mobile-overview.png)
 
 ## Features
 
@@ -67,4 +81,3 @@ See `services.yaml` for the full field definitions.
 ## License
 
 This project is licensed under the MIT License.
-
