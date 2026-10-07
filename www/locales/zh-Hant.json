@@ -74,7 +74,7 @@
   "settings.language": "語系",
   "settings.language_hint": "自動模式會跟隨 Home Assistant 語系。你也可以在此瀏覽器手動指定語系。",
   "settings.about": "關於",
-  "settings.about_text": "記帳本 v1.1.0 — 整合於 Home Assistant，資料存在 HA storage 並隨著系統備份。",
+  "settings.about_text": "記帳本 v1.1.1 — 整合於 Home Assistant，資料存在 HA storage 並隨著系統備份。",
   "settings.new_book": "+ 新增記帳本",
   "settings.export": "匯出 JSON",
   "settings.import": "匯入 JSON",

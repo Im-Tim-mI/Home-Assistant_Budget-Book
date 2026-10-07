@@ -74,7 +74,7 @@
   "settings.language": "Language",
   "settings.language_hint": "Auto follows the Home Assistant language. Choose a language here to override it for this browser.",
   "settings.about": "About",
-  "settings.about_text": "Budget Book v1.1.0 — integrated with Home Assistant. Data is stored in HA storage and included in system backups.",
+  "settings.about_text": "Budget Book v1.1.1 — integrated with Home Assistant. Data is stored in HA storage and included in system backups.",
   "settings.new_book": "+ New budget book",
   "settings.export": "Export JSON",
   "settings.import": "Import JSON",

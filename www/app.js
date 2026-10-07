@@ -26,6 +26,7 @@ let currentLanguage = 'zh-Hant';
 let parentLanguage = null;
 let messages = {};
 let allMessages = {};
+let refreshInFlight = false;
 
 function normalizeLanguage(lang) {
   const raw = String(lang || '').replace('_', '-').toLowerCase();
@@ -122,6 +123,12 @@ async function getParentHass(maxWaitMs = 10000) {
   return null;
 }
 
+async function refreshParentHass(maxWaitMs = 1000) {
+  const latest = await getParentHass(maxWaitMs);
+  if (latest) parentHass = latest;
+  return parentHass;
+}
+
 async function getAuthToken() {
   // 1) From the parent HA frontend's live auth object (works in browser and Companion app)
   try {
@@ -148,9 +155,11 @@ async function getAuthToken() {
 async function callService(domain, service, data = {}) {
   // Prefer the parent frontend's websocket connection: no token needed,
   // and it works in the HA Companion app (which uses external auth, no hassTokens).
-  const hass = parentHass || await getParentHass(3000);
+  const hass = await refreshParentHass(1000);
   if (hass && typeof hass.callService === 'function') {
-    return await hass.callService(domain, service, data);
+    const result = await hass.callService(domain, service, data);
+    scheduleStateRefresh();
+    return result;
   }
   const token = await getAuthToken();
   if (!token) throw new Error('No auth token');
@@ -166,7 +175,9 @@ async function callService(domain, service, data = {}) {
     const text = await resp.text();
     throw new Error(`Service call failed: ${resp.status} ${text}`);
   }
-  return await resp.json();
+  const result = await resp.json();
+  scheduleStateRefresh();
+  return result;
 }
 
 function syncStates() {
@@ -175,6 +186,46 @@ function syncStates() {
   for (const [eid, st] of Object.entries(parentHass.states)) {
     states[eid] = st;
   }
+}
+
+function getDataSnapshot(sourceStates = states) {
+  return JSON.stringify(sourceStates['sensor.budget_book_all_books']?.attributes?.full_data || {});
+}
+
+async function refreshStateFromHomeAssistant({ forceRender = false } = {}) {
+  if (refreshInFlight) return false;
+  refreshInFlight = true;
+  try {
+    await refreshParentHass(1000);
+    if (!parentHass?.states) return false;
+
+    const prev = getDataSnapshot(states);
+    const next = getDataSnapshot(parentHass.states);
+    syncStates();
+
+    const nextLang = getHassLanguage();
+    if (localeChoice === 'auto' && nextLang !== parentLanguage) {
+      parentLanguage = nextLang;
+      refreshLanguageFromChoice();
+      return true;
+    }
+
+    if (forceRender || prev !== next) {
+      render();
+      return true;
+    }
+    return false;
+  } finally {
+    refreshInFlight = false;
+  }
+}
+
+function scheduleStateRefresh() {
+  [150, 700, 1500, 3000].forEach((delay) => {
+    setTimeout(() => {
+      refreshStateFromHomeAssistant().catch((err) => log('refresh failed:', err.message));
+    }, delay);
+  });
 }
 
 function showError(msg) {
@@ -187,7 +238,7 @@ function showError(msg) {
 async function connectHA() {
   try {
     log('Connecting...');
-    parentHass = await getParentHass(8000);
+    parentHass = await refreshParentHass(8000);
     parentLanguage = getHassLanguage();
     refreshLanguageFromChoice();
     if (!parentHass) {
@@ -201,20 +252,12 @@ async function connectHA() {
       throw new Error(t('error.no_sensor'));
     }
 
-    // Poll for changes every 3s
+    // Poll for changes every 3s. Home Assistant replaces the hass object when
+    // state updates arrive, so always fetch the current parent hass before
+    // comparing data. Keeping the old object makes successful writes appear
+    // stale until the panel is reloaded.
     setInterval(() => {
-      if (!parentHass) return;
-      const prev = JSON.stringify(states['sensor.budget_book_all_books']?.attributes?.full_data || {});
-      const next = JSON.stringify(parentHass.states['sensor.budget_book_all_books']?.attributes?.full_data || {});
-      if (prev !== next) {
-        syncStates();
-        render();
-      }
-      const nextLang = getHassLanguage();
-      if (localeChoice === 'auto' && nextLang !== parentLanguage) {
-        parentLanguage = nextLang;
-        refreshLanguageFromChoice();
-      }
+      refreshStateFromHomeAssistant().catch((err) => log('poll failed:', err.message));
     }, 3000);
 
     return true;

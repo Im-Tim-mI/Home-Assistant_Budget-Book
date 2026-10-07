@@ -74,7 +74,7 @@
   "settings.language": "语言",
   "settings.language_hint": "自动模式会跟随 Home Assistant 语言。你也可以在此浏览器手动指定语言。",
   "settings.about": "关于",
-  "settings.about_text": "记账本 v1.1.0 — 集成于 Home Assistant，数据储存在 HA storage，并随系统备份保存。",
+  "settings.about_text": "记账本 v1.1.1 — 集成于 Home Assistant，数据储存在 HA storage，并随系统备份保存。",
   "settings.new_book": "+ 新增记账本",
   "settings.export": "导出 JSON",
   "settings.import": "导入 JSON",
