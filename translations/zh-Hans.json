@@ -1,0 +1,16 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "记账本设置",
+        "description": "首次安装会自动创建默认记账本。你也可以选择载入示例数据快速体验。",
+        "data": {
+          "load_sample": "载入示例数据（两本记账本 + 预算 + 固定支出）"
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "记账本只能设置一次"
+    }
+  }
+}

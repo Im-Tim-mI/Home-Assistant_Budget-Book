@@ -29,6 +29,18 @@ A Home Assistant custom integration that adds a sidebar budgeting panel with tra
 - Set monthly category budgets with 80% warning and over-budget alerts.
 - Configure recurring monthly entries that are checked automatically every day at 09:00.
 - Import, export, and load sample data as JSON.
+- Built-in interface languages: English, Traditional Chinese, and Simplified Chinese.
+- Auto language mode follows the Home Assistant language, with an optional manual override in Budget Book settings.
+
+## Languages
+
+Budget Book stores frontend language files in `www/locales/`:
+
+- `en.json`
+- `zh-Hant.json`
+- `zh-Hans.json`
+
+To add another language later, add a new JSON file with the same keys, then register the language in `www/app.js`.
 
 ## Installation
 

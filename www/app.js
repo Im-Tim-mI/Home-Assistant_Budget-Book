@@ -3,8 +3,10 @@
 // ============================================================
 
 const $ = (id) => document.getElementById(id);
-const fmt = (n) => n == null ? '—' : Math.round(n).toLocaleString();
-const fmtSigned = (n) => n == null ? '—' : (n >= 0 ? '+' : '') + Math.round(n).toLocaleString();
+const fmt = (n) => n == null ? '—' : Math.round(n).toLocaleString(currentLanguage);
+const fmtSigned = (n) => n == null ? '—' : (n >= 0 ? '+' : '') + Math.round(n).toLocaleString(currentLanguage);
+const SUPPORTED_LANGS = ['en', 'zh-Hant', 'zh-Hans'];
+const LOCALE_STORAGE_KEY = 'budgetBookLanguage';
 
 function log(...args) {
   console.log('[BudgetBook]', ...args);
@@ -19,6 +21,87 @@ let modalTxType = 'expense';
 let modalTxCategory = null;
 let editingTxId = null;
 let modalCatType = 'expense';
+let localeChoice = localStorage.getItem(LOCALE_STORAGE_KEY) || 'auto';
+let currentLanguage = 'zh-Hant';
+let parentLanguage = null;
+let messages = {};
+let allMessages = {};
+
+function normalizeLanguage(lang) {
+  const raw = String(lang || '').replace('_', '-').toLowerCase();
+  if (raw.startsWith('zh-hans') || raw === 'zh-cn' || raw === 'zh-sg' || raw === 'cn') return 'zh-Hans';
+  if (raw.startsWith('zh-hant') || raw === 'zh-tw' || raw === 'zh-hk' || raw === 'zh-mo' || raw === 'tw') return 'zh-Hant';
+  if (raw.startsWith('zh')) return 'zh-Hant';
+  if (raw.startsWith('en')) return 'en';
+  return 'en';
+}
+
+function getHassLanguage() {
+  const locale = parentHass?.locale || {};
+  return normalizeLanguage(locale.language || locale.locale || parentHass?.language || navigator.language);
+}
+
+async function loadLocales() {
+  const pairs = await Promise.all(SUPPORTED_LANGS.map(async (lang) => {
+    const resp = await fetch(`locales/${lang}.json?v=4`);
+    if (!resp.ok) throw new Error(`Cannot load locale ${lang}`);
+    return [lang, await resp.json()];
+  }));
+  allMessages = Object.fromEntries(pairs);
+  messages = allMessages[currentLanguage] || {};
+}
+
+function t(key, vars = {}) {
+  const template = messages[key] || allMessages['zh-Hant']?.[key] || key;
+  return String(template).replace(/\{(\w+)\}/g, (_, name) => vars[name] ?? '');
+}
+
+function tr(key, vars = {}) {
+  return t(key, vars);
+}
+
+function setText(id, key) {
+  const el = $(id);
+  if (el) el.textContent = t(key);
+}
+
+function translateDocument() {
+  messages = allMessages[currentLanguage] || allMessages.en || {};
+  document.documentElement.lang = currentLanguage;
+  document.title = t('app.title');
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((el) => {
+    el.setAttribute('placeholder', t(el.dataset.i18nPlaceholder));
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach((el) => {
+    el.setAttribute('title', t(el.dataset.i18nTitle));
+  });
+  const langSelect = $('language-select');
+  if (langSelect) langSelect.value = localeChoice;
+}
+
+function applyLanguage(lang) {
+  currentLanguage = lang;
+  translateDocument();
+  render();
+}
+
+function refreshLanguageFromChoice() {
+  const next = localeChoice === 'auto' ? getHassLanguage() : normalizeLanguage(localeChoice);
+  if (next !== currentLanguage) {
+    applyLanguage(next);
+  } else {
+    translateDocument();
+  }
+}
+
+function categoryName(cat) {
+  if (!cat) return '';
+  const key = `category.${cat.id}`;
+  return messages[key] ? t(key) : cat.name;
+}
 
 // ============================================================
 // Connection
@@ -105,15 +188,17 @@ async function connectHA() {
   try {
     log('Connecting...');
     parentHass = await getParentHass(8000);
+    parentLanguage = getHassLanguage();
+    refreshLanguageFromChoice();
     if (!parentHass) {
-      throw new Error('找不到 home-assistant 元素。請從 HA 側邊欄開啟。');
+      throw new Error(t('error.no_ha'));
     }
     syncStates();
     log('Connected. States:', Object.keys(states).length);
 
     // Sanity check
     if (!states['sensor.budget_book_all_books']) {
-      throw new Error('找不到 sensor.budget_book_all_books。請確認整合已新增並重啟 HA。');
+      throw new Error(t('error.no_sensor'));
     }
 
     // Poll for changes every 3s
@@ -125,12 +210,17 @@ async function connectHA() {
         syncStates();
         render();
       }
+      const nextLang = getHassLanguage();
+      if (localeChoice === 'auto' && nextLang !== parentLanguage) {
+        parentLanguage = nextLang;
+        refreshLanguageFromChoice();
+      }
     }, 3000);
 
     return true;
   } catch (e) {
     log('Connection failed:', e.message);
-    showError('連線失敗:' + e.message);
+    showError(t('error.connect_failed', { message: e.message }));
     return false;
   }
 }
@@ -212,7 +302,7 @@ function renderHome() {
   $('m-month-expense').textContent = fmt(m.month_expense);
   $('m-month-income').textContent = fmt(m.month_income);
   $('m-month-label').textContent = m.month_label;
-  $('m-tx-count').textContent = `總計 ${m.transaction_count} 筆`;
+  $('m-tx-count').textContent = t('summary.transaction_count', { count: m.transaction_count });
 
   const bEl = $('m-month-balance');
   bEl.textContent = fmtSigned(m.month_balance);
@@ -227,11 +317,11 @@ function renderHome() {
   const warnCount = (m.budget_alerts || []).filter(a => a.severity === 'warning').length;
   let banner = '';
   if (overCount > 0) {
-    const names = m.budget_alerts.filter(a => a.severity === 'over').map(a => a.category_name).join('、');
-    banner = `<div class="banner banner-over"><div class="banner-title">⚠️ ${overCount} 個類別超支</div>已超支:${names}</div>`;
+    const names = m.budget_alerts.filter(a => a.severity === 'over').map(a => getCatName(getActiveBook(), a.category_id || a.category)).join('、');
+    banner = `<div class="banner banner-over"><div class="banner-title">⚠️ ${t('banner.over', { count: overCount })}</div>${t('banner.over_names', { names })}</div>`;
   } else if (warnCount > 0) {
-    const names = m.budget_alerts.filter(a => a.severity === 'warning').map(a => `${a.category_name}(${a.pct}%)`).join('、');
-    banner = `<div class="banner banner-warning"><div class="banner-title">⚠️ ${warnCount} 個類別預算警戒</div>${names}</div>`;
+    const names = m.budget_alerts.filter(a => a.severity === 'warning').map(a => `${getCatName(getActiveBook(), a.category_id || a.category)}(${a.pct}%)`).join('、');
+    banner = `<div class="banner banner-warning"><div class="banner-title">⚠️ ${t('banner.warning', { count: warnCount })}</div>${names}</div>`;
   }
   $('budget-banner').innerHTML = banner;
 
@@ -239,7 +329,7 @@ function renderHome() {
   const catEl = $('home-categories');
   const cats = m.category_breakdown || [];
   if (cats.length === 0) {
-    catEl.innerHTML = '<div class="empty">本月還沒有支出紀錄</div>';
+    catEl.innerHTML = `<div class="empty">${t('empty.no_month_expenses')}</div>`;
   } else {
     catEl.innerHTML = cats.slice(0, 8).map(c => {
       let barClass = '';
@@ -253,12 +343,12 @@ function renderHome() {
       }
       const budgetStr = c.budget
         ? `<span class="category-meta">${fmt(c.amount)} / ${fmt(c.budget)} (${c.usage_pct}%)</span>`
-        : `<span class="category-meta">${c.count} 筆</span>`;
+        : `<span class="category-meta">${t('summary.category_count', { count: c.count })}</span>`;
       return `
         <div class="category-row">
           <span class="cat-color-dot" style="background:${c.color || '#999'}"></span>
           <div class="category-info">
-            <div class="category-name">${c.name}</div>
+            <div class="category-name">${getCatName(getActiveBook(), c.category_id) || c.name}</div>
             ${budgetStr}
           </div>
           <div class="category-bar-wrap">
@@ -275,7 +365,7 @@ function renderHome() {
   const upcomingEl = $('home-upcoming');
   const recurring = (book?.recurring || []).filter(r => r.active);
   if (recurring.length === 0) {
-    upcomingEl.innerHTML = '<div class="empty">尚未設定固定支出</div>';
+    upcomingEl.innerHTML = `<div class="empty">${t('empty.no_recurring')}</div>`;
   } else {
     const today = new Date();
     const upcoming = recurring.map(r => {
@@ -290,9 +380,9 @@ function renderHome() {
 
     upcomingEl.innerHTML = upcoming.map(r => {
       let badge = '';
-      if (r.daysUntil <= 0) badge = '<span class="badge badge-today">今天</span>';
-      else if (r.daysUntil <= 3) badge = `<span class="badge badge-soon">${r.daysUntil} 天後</span>`;
-      else badge = `<span class="badge">${r.daysUntil} 天後</span>`;
+      if (r.daysUntil <= 0) badge = `<span class="badge badge-today">${t('date.today')}</span>`;
+      else if (r.daysUntil <= 3) badge = `<span class="badge badge-soon">${t('date.days_later', { days: r.daysUntil })}</span>`;
+      else badge = `<span class="badge">${t('date.days_later', { days: r.daysUntil })}</span>`;
       const catName = getCatName(book, r.category);
       return `
         <div class="upcoming-row">
@@ -310,12 +400,12 @@ function renderHome() {
   const recentEl = $('home-recent-tbody');
   const txs = [...(book?.transactions || [])].sort((a, b) => txSortKey(b).localeCompare(txSortKey(a))).slice(0, 8);
   if (txs.length === 0) {
-    recentEl.innerHTML = '<tr><td colspan="4" class="empty">無交易紀錄</td></tr>';
+    recentEl.innerHTML = `<tr><td colspan="4" class="empty">${t('empty.no_recent_transactions')}</td></tr>`;
   } else {
     recentEl.innerHTML = txs.map(t => {
       const cat = book.categories.find(c => c.id === t.category);
       const catBadge = cat
-        ? `<span style="display:inline-flex;align-items:center;gap:4px"><span class="cat-color-dot" style="background:${cat.color}"></span>${cat.name}</span>`
+        ? `<span style="display:inline-flex;align-items:center;gap:4px"><span class="cat-color-dot" style="background:${cat.color}"></span>${categoryName(cat)}</span>`
         : t.category;
       const sign = t.type === 'expense' ? '-' : '+';
       const cls = t.type === 'expense' ? 'negative' : 'positive';
@@ -334,7 +424,7 @@ function renderHome() {
 function getCatName(book, catId) {
   if (!book) return catId;
   const c = book.categories.find(c => c.id === catId);
-  return c ? c.name : catId;
+  return c ? categoryName(c) : catId;
 }
 
 function renderTransactions() {
@@ -344,11 +434,11 @@ function renderTransactions() {
   // Populate filters
   const catFilter = $('tx-cat-filter');
   const currentCat = catFilter.value;
-  catFilter.innerHTML = '<option value="">全部分類</option>';
+  catFilter.innerHTML = `<option value="">${t('filter.all_categories')}</option>`;
   book.categories.forEach(c => {
     const opt = document.createElement('option');
     opt.value = c.id;
-    opt.textContent = c.name;
+    opt.textContent = categoryName(c);
     catFilter.appendChild(opt);
   });
   catFilter.value = currentCat;
@@ -357,7 +447,7 @@ function renderTransactions() {
   const monthFilter = $('tx-month-filter');
   const currentMonth = monthFilter.value;
   const months = [...new Set(book.transactions.map(t => t.date.slice(0, 7)))].sort().reverse();
-  monthFilter.innerHTML = '<option value="">全部月份</option>' +
+  monthFilter.innerHTML = `<option value="">${t('filter.all_months')}</option>` +
     months.map(m => `<option value="${m}">${m}</option>`).join('');
   monthFilter.value = currentMonth;
 
@@ -387,17 +477,17 @@ function applyTxFilters() {
   if (filtered.length === 0) {
     tbody.innerHTML = '';
     $('tx-empty').style.display = 'block';
-    $('tx-empty').textContent = book.transactions.length ? '無符合條件的交易' : '尚無交易';
+    $('tx-empty').textContent = book.transactions.length ? t('empty.no_matching_transactions') : t('empty.no_transactions');
   } else {
     $('tx-empty').style.display = 'none';
     tbody.innerHTML = filtered.map(t => {
       const cat = book.categories.find(c => c.id === t.category);
       const catBadge = cat
-        ? `<span style="display:inline-flex;align-items:center;gap:4px"><span class="cat-color-dot" style="background:${cat.color}"></span>${cat.name}</span>`
+        ? `<span style="display:inline-flex;align-items:center;gap:4px"><span class="cat-color-dot" style="background:${cat.color}"></span>${categoryName(cat)}</span>`
         : t.category;
       const sign = t.type === 'expense' ? '-' : '+';
       const cls = t.type === 'expense' ? 'negative' : 'positive';
-      const typeBadge = `<span class="badge badge-${t.type}">${t.type === 'expense' ? '支出' : '收入'}</span>`;
+      const typeBadge = `<span class="badge badge-${t.type}">${tr(`type.${t.type}`)}</span>`;
       return `
         <tr>
           <td>${fmtTxDate(t)}</td>
@@ -412,10 +502,10 @@ function applyTxFilters() {
 
     tbody.querySelectorAll('.del-btn').forEach(b => {
       b.onclick = async () => {
-        if (!confirm('確定刪除這筆交易?')) return;
+        if (!confirm(tr('confirm.delete_transaction'))) return;
         try {
           await callService('budget_book', 'delete_transaction', { transaction_id: b.dataset.txId });
-        } catch (e) { alert('刪除失敗:' + e.message); }
+        } catch (e) { alert(tr('alert.delete_failed', { message: e.message })); }
       };
     });
   }
@@ -449,8 +539,8 @@ function renderCharts() {
     data: {
       labels: trendData.map(d => d.label),
       datasets: [
-        { label: '收入', data: trendData.map(d => d.income), backgroundColor: '#27AE60' },
-        { label: '支出', data: trendData.map(d => d.expense), backgroundColor: '#E74C3C' },
+        { label: t('type.income'), data: trendData.map(d => d.income), backgroundColor: '#27AE60' },
+        { label: t('type.expense'), data: trendData.map(d => d.expense), backgroundColor: '#E74C3C' },
       ]
     },
     options: opts.bar
@@ -463,7 +553,7 @@ function renderCharts() {
     drawChart('chart-pie', {
       type: 'doughnut',
       data: {
-        labels: breakdown.map(c => c.name),
+        labels: breakdown.map(c => getCatName(book, c.category_id)),
         datasets: [{
           data: breakdown.map(c => c.amount),
           backgroundColor: breakdown.map(c => c.color || '#999'),
@@ -481,9 +571,9 @@ function renderCharts() {
     drawChart('chart-budgets', {
       type: 'bar',
       data: {
-        labels: alerts.map(a => a.category_name),
+        labels: alerts.map(a => getCatName(book, a.category_id || a.category)),
         datasets: [{
-          label: '使用率 %',
+          label: t('chart.usage_pct'),
           data: alerts.map(a => a.pct),
           backgroundColor: alerts.map(a => {
             if (a.severity === 'over') return '#E74C3C';
@@ -536,13 +626,13 @@ function renderCategories() {
   const expEl = $('cat-list-expense');
   const incEl = $('cat-list-income');
   const renderList = (list) => {
-    if (list.length === 0) return '<div class="empty">尚無分類</div>';
+    if (list.length === 0) return `<div class="empty">${t('empty.no_categories')}</div>`;
     // Don't allow deleting the last category of a type
     const canDelete = list.length > 1;
     return list.map(c => `
       <div class="chip cat-chip" title="${c.id}">
-        <span class="chip-dot" style="background:${c.color}"></span>${c.name}
-        ${canDelete ? `<button class="cat-del-btn" data-del-cat="${c.id}" data-del-name="${c.name}" title="刪除分類">×</button>` : ''}
+        <span class="chip-dot" style="background:${c.color}"></span>${categoryName(c)}
+        ${canDelete ? `<button class="cat-del-btn" data-del-cat="${c.id}" data-del-name="${categoryName(c)}" title="${t('action.delete')}">×</button>` : ''}
       </div>
     `).join('');
   };
@@ -552,10 +642,10 @@ function renderCategories() {
   document.querySelectorAll('#tab-categories [data-del-cat]').forEach(b => {
     b.onclick = async (ev) => {
       ev.stopPropagation();
-      if (!confirm(`刪除分類「${b.dataset.delName}」?\n\n此分類的預算設定會一併移除,原有交易會改歸到「其他」。`)) return;
+      if (!confirm(t('confirm.delete_category', { name: b.dataset.delName }))) return;
       try {
         await callService('budget_book', 'delete_category', { category: b.dataset.delCat });
-      } catch (e) { alert('刪除失敗:' + e.message); }
+      } catch (e) { alert(t('alert.delete_failed', { message: e.message })); }
     };
   });
 }
@@ -579,19 +669,19 @@ function renderBudgets() {
       const realPct = (spent / limit) * 100;
       if (realPct >= 100) progressClass = 'over';
       else if (realPct >= 80) progressClass = 'warn';
-      amountStr = `本月已花 ${fmt(spent)} / 上限 ${fmt(limit)} (${realPct.toFixed(0)}%)`;
+      amountStr = t('budgets.spent_with_limit', { spent: fmt(spent), limit: fmt(limit), pct: realPct.toFixed(0) });
     } else {
-      amountStr = `本月已花 ${fmt(spent)} · <em style="color:var(--text-muted)">尚未設定預算</em>`;
+      amountStr = t('budgets.spent_no_limit', { spent: fmt(spent) });
     }
     return `
       <div class="budget-row">
         <span class="cat-color-dot" style="background:${c.color}"></span>
         <div class="budget-info">
-          <div style="font-weight:500">${c.name}</div>
+          <div style="font-weight:500">${categoryName(c)}</div>
           <div class="budget-progress"><div class="budget-progress-fill ${progressClass}" style="width:${pct}%"></div></div>
           <div class="budget-amount-display">${amountStr}</div>
         </div>
-        <button class="btn-secondary" data-budget-cat="${c.id}" data-budget-name="${c.name}" data-budget-limit="${limit || ''}">設定</button>
+        <button class="btn-secondary" data-budget-cat="${c.id}" data-budget-name="${categoryName(c)}" data-budget-limit="${limit || ''}">${t('action.set')}</button>
       </div>
     `;
   }).join('');
@@ -613,9 +703,9 @@ function renderRecurring() {
     $('recurring-empty').style.display = 'none';
     tbody.innerHTML = rules.map(r => {
       const cat = book.categories.find(c => c.id === r.category);
-      const catName = cat ? cat.name : r.category;
-      const typeBadge = `<span class="badge badge-${r.type}">${r.type === 'expense' ? '支出' : '收入'}</span>`;
-      const lastRun = r.last_run_date || '<span style="color:var(--text-muted)">未執行</span>';
+      const catName = cat ? categoryName(cat) : r.category;
+      const typeBadge = `<span class="badge badge-${r.type}">${t(`type.${r.type}`)}</span>`;
+      const lastRun = r.last_run_date || `<span style="color:var(--text-muted)">${t('recurring.not_run')}</span>`;
       const sign = r.type === 'expense' ? '-' : '+';
       const cls = r.type === 'expense' ? 'negative' : 'positive';
       return `
@@ -624,7 +714,7 @@ function renderRecurring() {
           <td>${typeBadge}</td>
           <td>${catName}</td>
           <td style="text-align:right" class="${cls}">${sign}${fmt(r.amount)}</td>
-          <td style="text-align:center">${r.day_of_month} 號</td>
+          <td style="text-align:center">${t('recurring.day_suffix', { day: r.day_of_month })}</td>
           <td>${lastRun}</td>
           <td><button class="del-btn" data-rec-id="${r.id}">×</button></td>
         </tr>
@@ -633,9 +723,9 @@ function renderRecurring() {
 
     tbody.querySelectorAll('.del-btn').forEach(b => {
       b.onclick = async () => {
-        if (!confirm('刪除此固定支出規則?(已建立的交易不會刪除)')) return;
+        if (!confirm(t('confirm.delete_recurring'))) return;
         try { await callService('budget_book', 'delete_recurring', { recurring_id: b.dataset.recId }); }
-        catch (e) { alert('刪除失敗:' + e.message); }
+        catch (e) { alert(t('alert.delete_failed', { message: e.message })); }
       };
     });
   }
@@ -648,13 +738,13 @@ function renderSettings() {
     const isActive = b.id === data.active_book_id;
     return `
       <tr>
-        <td>${b.name}${isActive ? ' <span class="badge badge-today">使用中</span>' : ''}</td>
+        <td>${b.name}${isActive ? ` <span class="badge badge-today">${t('settings.active')}</span>` : ''}</td>
         <td>${b.currency || 'TWD'}</td>
         <td>${b.transaction_count}</td>
         <td>
-          <button class="btn-secondary" data-book-rename="${b.id}" data-book-name="${b.name}">改名</button>
-          ${!isActive ? `<button class="btn-secondary" data-book-activate="${b.id}">切換</button>` : ''}
-          ${Object.keys(data.books).length > 1 ? `<button class="btn-danger" data-book-delete="${b.id}" data-book-name="${b.name}">刪除</button>` : ''}
+          <button class="btn-secondary" data-book-rename="${b.id}" data-book-name="${b.name}">${t('action.rename')}</button>
+          ${!isActive ? `<button class="btn-secondary" data-book-activate="${b.id}">${t('action.switch')}</button>` : ''}
+          ${Object.keys(data.books).length > 1 ? `<button class="btn-danger" data-book-delete="${b.id}" data-book-name="${b.name}">${t('action.delete')}</button>` : ''}
         </td>
       </tr>
     `;
@@ -662,24 +752,24 @@ function renderSettings() {
 
   tbody.querySelectorAll('[data-book-rename]').forEach(b => {
     b.onclick = async () => {
-      const name = prompt('新名稱:', b.dataset.bookName);
+      const name = prompt(t('prompt.new_name'), b.dataset.bookName);
       if (name && name !== b.dataset.bookName) {
         try { await callService('budget_book', 'rename_book', { book_id: b.dataset.bookRename, name }); }
-        catch (e) { alert('改名失敗:' + e.message); }
+        catch (e) { alert(t('alert.rename_failed', { message: e.message })); }
       }
     };
   });
   tbody.querySelectorAll('[data-book-activate]').forEach(b => {
     b.onclick = async () => {
       try { await callService('budget_book', 'set_active_book', { book_id: b.dataset.bookActivate }); }
-      catch (e) { alert('切換失敗:' + e.message); }
+      catch (e) { alert(t('alert.switch_failed', { message: e.message })); }
     };
   });
   tbody.querySelectorAll('[data-book-delete]').forEach(b => {
     b.onclick = async () => {
-      if (!confirm(`確定刪除「${b.dataset.bookName}」?此記帳本的所有交易都會被清除,不可復原!`)) return;
+      if (!confirm(t('confirm.delete_book', { name: b.dataset.bookName }))) return;
       try { await callService('budget_book', 'delete_book', { book_id: b.dataset.bookDelete }); }
-      catch (e) { alert('刪除失敗:' + e.message); }
+      catch (e) { alert(t('alert.delete_failed', { message: e.message })); }
     };
   });
 }
@@ -722,7 +812,7 @@ function fmtTime(t) {
   if (!t) return '';
   const [h, m] = t.split(':').map(Number);
   const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${h < 12 ? '上午' : '下午'} ${h12}:${String(m).padStart(2, '0')}`;
+  return `${h < 12 ? tr('time.am') : tr('time.pm')} ${h12}:${String(m).padStart(2, '0')}`;
 }
 
 function txSortKey(t) {
@@ -741,7 +831,7 @@ function openTxModal() {
   modalTxType = 'expense';
   modalTxCategory = null;
   editingTxId = null;
-  $('modal-tx-title').textContent = '新增交易';
+  setText('modal-tx-title', 'modal.transaction.title');
   $('tx-amount').value = '';
   $('tx-note').value = '';
   const now = new Date();
@@ -762,7 +852,7 @@ function renderCatPicker() {
   const picker = $('tx-cat-picker');
   picker.innerHTML = cats.map(c => `
     <div class="chip ${modalTxCategory === c.id ? 'selected' : ''}" data-cat="${c.id}">
-      <span class="chip-dot" style="background:${c.color}"></span>${c.name}
+      <span class="chip-dot" style="background:${c.color}"></span>${categoryName(c)}
     </div>
   `).join('');
   picker.querySelectorAll('.chip').forEach(ch => {
@@ -781,7 +871,7 @@ function renderCatPicker() {
 function openBookModal() {
   $('book-name').value = '';
   $('book-currency').value = 'TWD';
-  $('modal-book-title').textContent = '新增記帳本';
+  setText('modal-book-title', 'modal.book.title');
   openModal('modal-book');
   setTimeout(() => $('book-name').focus(), 100);
 }
@@ -796,13 +886,13 @@ function openRecurringModal() {
   $('rec-note').value = '';
   const catSel = $('rec-category');
   catSel.innerHTML = book.categories.filter(c => c.type === 'expense')
-    .map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    .map(c => `<option value="${c.id}">${categoryName(c)}</option>`).join('');
   openModal('modal-recurring');
 }
 
 function openBudgetModal(catId, catName, limit) {
   $('budget-cat-id').value = catId;
-  $('budget-cat-label').textContent = `分類:${catName}`;
+  $('budget-cat-label').textContent = `${t('field.category')}: ${catName}`;
   $('budget-amount').value = limit || '';
   openModal('modal-budget');
   setTimeout(() => $('budget-amount').focus(), 100);
@@ -810,7 +900,7 @@ function openBudgetModal(catId, catName, limit) {
 
 function openCatModal(type) {
   modalCatType = type;
-  $('modal-cat-title').textContent = type === 'income' ? '新增收入分類' : '新增支出分類';
+  $('modal-cat-title').textContent = type === 'income' ? t('modal.category.income_title') : t('modal.category.expense_title');
   $('cat-name').value = '';
   $('cat-icon').value = '';
   $('cat-color').value = type === 'income' ? '#27AE60' : '#E67E22';
@@ -842,7 +932,13 @@ function bindEvents() {
   // Book switcher
   $('book-switcher').onchange = async (e) => {
     try { await callService('budget_book', 'set_active_book', { book_id: e.target.value }); }
-    catch (err) { alert('切換失敗:' + err.message); }
+    catch (err) { alert(t('alert.switch_failed', { message: err.message })); }
+  };
+
+  $('language-select').onchange = (e) => {
+    localeChoice = e.target.value;
+    localStorage.setItem(LOCALE_STORAGE_KEY, localeChoice);
+    refreshLanguageFromChoice();
   };
 
   // Quick add
@@ -863,15 +959,15 @@ function bindEvents() {
     const date = $('tx-date').value;
     const time = getTimePicker();
     const note = $('tx-note').value;
-    if (!amount || amount <= 0) { alert('請輸入金額'); return; }
-    if (!date) { alert('請選擇日期'); return; }
-    if (!modalTxCategory) { alert('請選擇分類'); return; }
+    if (!amount || amount <= 0) { alert(t('alert.required_amount')); return; }
+    if (!date) { alert(t('alert.required_date')); return; }
+    if (!modalTxCategory) { alert(t('alert.required_category')); return; }
     try {
       await callService('budget_book', 'add_transaction', {
         date, time, type: modalTxType, amount, category: modalTxCategory, note
       });
       closeModal('modal-tx');
-    } catch (e) { alert('新增失敗:' + e.message); }
+    } catch (e) { alert(t('alert.add_failed', { message: e.message })); }
   };
 
   // TX filters
@@ -890,7 +986,7 @@ function bindEvents() {
         category: catId, amount: amount > 0 ? amount : null
       });
       closeModal('modal-budget');
-    } catch (e) { alert('儲存失敗:' + e.message); }
+    } catch (e) { alert(t('alert.save_failed', { message: e.message })); }
   };
 
   // Categories
@@ -900,13 +996,13 @@ function bindEvents() {
     const name = $('cat-name').value.trim();
     const color = $('cat-color').value;
     const icon = $('cat-icon').value.trim();
-    if (!name) { alert('請輸入分類名稱'); return; }
+    if (!name) { alert(t('alert.required_category_name')); return; }
     const payload = { name, type: modalCatType, color };
     if (icon) payload.icon = icon;
     try {
       await callService('budget_book', 'add_category', payload);
       closeModal('modal-cat');
-    } catch (e) { alert('新增失敗:' + e.message); }
+    } catch (e) { alert(t('alert.add_failed', { message: e.message })); }
   };
 
   // Recurring
@@ -916,7 +1012,7 @@ function bindEvents() {
     const type = $('rec-type').value;
     const catSel = $('rec-category');
     catSel.innerHTML = book.categories.filter(c => c.type === type)
-      .map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      .map(c => `<option value="${c.id}">${categoryName(c)}</option>`).join('');
   };
   $('rec-submit').onclick = async () => {
     const data = {
@@ -927,17 +1023,17 @@ function bindEvents() {
       day_of_month: parseInt($('rec-day').value),
       note: $('rec-note').value
     };
-    if (!data.name || !data.amount || !data.day_of_month) { alert('請填寫名稱、金額、每月幾號'); return; }
+    if (!data.name || !data.amount || !data.day_of_month) { alert(t('alert.required_recurring')); return; }
     try {
       await callService('budget_book', 'add_recurring', data);
       closeModal('modal-recurring');
-    } catch (e) { alert('新增失敗:' + e.message); }
+    } catch (e) { alert(t('alert.add_failed', { message: e.message })); }
   };
   $('btn-run-recurring').onclick = async () => {
     try {
       await callService('budget_book', 'run_recurring');
-      alert('已執行檢查');
-    } catch (e) { alert('執行失敗:' + e.message); }
+      alert(t('alert.run_done'));
+    } catch (e) { alert(t('alert.run_failed', { message: e.message })); }
   };
 
   // Book management
@@ -945,11 +1041,11 @@ function bindEvents() {
   $('book-submit').onclick = async () => {
     const name = $('book-name').value.trim();
     const currency = $('book-currency').value.trim() || 'TWD';
-    if (!name) { alert('請輸入名稱'); return; }
+    if (!name) { alert(t('alert.required_name')); return; }
     try {
       await callService('budget_book', 'create_book', { name, currency });
       closeModal('modal-book');
-    } catch (e) { alert('建立失敗:' + e.message); }
+    } catch (e) { alert(t('alert.create_failed', { message: e.message })); }
   };
 
   // Data management
@@ -977,30 +1073,30 @@ function bindEvents() {
       const text = await file.text();
       parsed = JSON.parse(text);
     } catch (e) {
-      alert('JSON 解析失敗:' + e.message);
+      alert(t('alert.json_failed', { message: e.message }));
       return;
     }
     if (!parsed.books || typeof parsed.books !== 'object') {
-      alert('格式錯誤:缺少 books 欄位');
+      alert(t('alert.invalid_import'));
       return;
     }
     const bookCount = Object.keys(parsed.books).length;
-    if (!confirm(`即將匯入 ${bookCount} 本記帳本,這會「覆蓋」所有現有資料。確定?\n\n建議先匯出備份。`)) return;
+    if (!confirm(t('confirm.import', { count: bookCount }))) return;
     try {
       await callService('budget_book', 'replace_data', { data: parsed });
-      alert('匯入完成');
-    } catch (e) { alert('匯入失敗:' + e.message); }
+      alert(t('alert.import_done'));
+    } catch (e) { alert(t('alert.import_failed', { message: e.message })); }
   });
   $('btn-load-sample').onclick = async () => {
-    if (!confirm('將覆蓋現有所有資料為範例資料(兩本記帳本)。確定?')) return;
+    if (!confirm(t('confirm.load_sample'))) return;
     try { await callService('budget_book', 'load_sample'); }
-    catch (e) { alert('載入失敗:' + e.message); }
+    catch (e) { alert(t('alert.load_failed', { message: e.message })); }
   };
   $('btn-clear').onclick = async () => {
-    if (!confirm('清空「目前」記帳本的所有交易、預算、固定支出。確定?')) return;
-    if (!confirm('再次確認 — 不可復原!')) return;
+    if (!confirm(t('confirm.clear_current'))) return;
+    if (!confirm(t('confirm.irreversible'))) return;
     try { await callService('budget_book', 'clear_all'); }
-    catch (e) { alert('清除失敗:' + e.message); }
+    catch (e) { alert(t('alert.clear_failed', { message: e.message })); }
   };
 }
 
@@ -1010,6 +1106,9 @@ function bindEvents() {
 
 (async () => {
   log('Bootstrap start');
+  currentLanguage = localeChoice === 'auto' ? normalizeLanguage(navigator.language) : normalizeLanguage(localeChoice);
+  await loadLocales();
+  translateDocument();
   try { bindEvents(); } catch (e) { log('bindEvents error:', e.message); }
   const ok = await connectHA();
   if (ok) {
@@ -1019,5 +1118,5 @@ function bindEvents() {
   }
 })().catch(e => {
   log('Bootstrap fatal:', e.message);
-  showError('啟動失敗:' + e.message);
+  showError(t('error.bootstrap_failed', { message: e.message }));
 });

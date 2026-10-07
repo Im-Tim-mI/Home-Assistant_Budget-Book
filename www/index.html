@@ -11,26 +11,26 @@
   <div id="app">
     <div id="loading" class="loading">
       <div class="spinner"></div>
-      <p>連接 Home Assistant 中…</p>
+      <p data-i18n="loading.connecting">連接 Home Assistant 中…</p>
     </div>
 
     <div id="main" style="display:none">
       <header>
-        <h1><span class="logo">📒</span> 記帳本</h1>
+        <h1><span class="logo">📒</span> <span data-i18n="app.title">記帳本</span></h1>
         <div class="header-right">
           <select id="book-switcher"></select>
-          <button id="btn-quick-add" class="btn-primary">+ 記一筆</button>
+          <button id="btn-quick-add" class="btn-primary" data-i18n="action.quick_add">+ 記一筆</button>
         </div>
       </header>
 
       <nav class="tabs">
-        <button class="tab active" data-tab="home">總覽</button>
-        <button class="tab" data-tab="tx">交易</button>
-        <button class="tab" data-tab="charts">圖表</button>
-        <button class="tab" data-tab="categories">分類</button>
-        <button class="tab" data-tab="budgets">預算</button>
-        <button class="tab" data-tab="recurring">固定支出</button>
-        <button class="tab" data-tab="settings">設定</button>
+        <button class="tab active" data-tab="home" data-i18n="tab.home">總覽</button>
+        <button class="tab" data-tab="tx" data-i18n="tab.transactions">交易</button>
+        <button class="tab" data-tab="charts" data-i18n="tab.charts">圖表</button>
+        <button class="tab" data-tab="categories" data-i18n="tab.categories">分類</button>
+        <button class="tab" data-tab="budgets" data-i18n="tab.budgets">預算</button>
+        <button class="tab" data-tab="recurring" data-i18n="tab.recurring">固定支出</button>
+        <button class="tab" data-tab="settings" data-i18n="tab.settings">設定</button>
       </nav>
 
       <main>
@@ -40,39 +40,39 @@
 
           <div class="metric-grid">
             <div class="metric metric-primary">
-              <div class="metric-label">本月支出</div>
+              <div class="metric-label" data-i18n="metric.month_expense">本月支出</div>
               <div class="metric-value negative" id="m-month-expense">—</div>
             </div>
             <div class="metric metric-primary">
-              <div class="metric-label">本月收入</div>
+              <div class="metric-label" data-i18n="metric.month_income">本月收入</div>
               <div class="metric-value positive" id="m-month-income">—</div>
             </div>
             <div class="metric metric-primary">
-              <div class="metric-label">本月結餘</div>
+              <div class="metric-label" data-i18n="metric.month_balance">本月結餘</div>
               <div class="metric-value" id="m-month-balance">—</div>
               <div class="metric-sub" id="m-month-label">—</div>
             </div>
             <div class="metric metric-primary">
-              <div class="metric-label">總結餘</div>
+              <div class="metric-label" data-i18n="metric.total_balance">總結餘</div>
               <div class="metric-value" id="m-balance">—</div>
               <div class="metric-sub" id="m-tx-count">—</div>
             </div>
           </div>
 
           <div class="card">
-            <div class="card-header">本月分類支出</div>
+            <div class="card-header" data-i18n="home.category_expense">本月分類支出</div>
             <div id="home-categories" class="category-list"></div>
           </div>
 
           <div class="card">
-            <div class="card-header">即將到期(固定支出)</div>
+            <div class="card-header" data-i18n="home.upcoming">即將到期(固定支出)</div>
             <div id="home-upcoming" class="upcoming-list"></div>
           </div>
 
           <div class="card">
-            <div class="card-header">近期交易</div>
+            <div class="card-header" data-i18n="home.recent">近期交易</div>
             <table class="data-table">
-              <thead><tr><th>日期</th><th>分類</th><th style="text-align:right">金額</th><th>備註</th></tr></thead>
+              <thead><tr><th data-i18n="table.date">日期</th><th data-i18n="table.category">分類</th><th style="text-align:right" data-i18n="table.amount">金額</th><th data-i18n="table.note">備註</th></tr></thead>
               <tbody id="home-recent-tbody"></tbody>
             </table>
           </div>
@@ -81,49 +81,49 @@
         <!-- ============ 交易 ============ -->
         <section id="tab-tx" class="tab-content">
           <div class="toolbar">
-            <input type="text" id="tx-filter" placeholder="搜尋備註、金額…" />
+            <input type="text" id="tx-filter" placeholder="搜尋備註、金額…" data-i18n-placeholder="filter.search" />
             <select id="tx-type-filter">
-              <option value="">全部類型</option>
-              <option value="income">收入</option>
-              <option value="expense">支出</option>
+              <option value="" data-i18n="filter.all_types">全部類型</option>
+              <option value="income" data-i18n="type.income">收入</option>
+              <option value="expense" data-i18n="type.expense">支出</option>
             </select>
             <select id="tx-cat-filter">
-              <option value="">全部分類</option>
+              <option value="" data-i18n="filter.all_categories">全部分類</option>
             </select>
             <select id="tx-month-filter">
-              <option value="">全部月份</option>
+              <option value="" data-i18n="filter.all_months">全部月份</option>
             </select>
           </div>
           <div class="card">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>日期</th>
-                  <th>類型</th>
-                  <th>分類</th>
-                  <th style="text-align:right">金額</th>
-                  <th>備註</th>
+                  <th data-i18n="table.date">日期</th>
+                  <th data-i18n="table.type">類型</th>
+                  <th data-i18n="table.category">分類</th>
+                  <th style="text-align:right" data-i18n="table.amount">金額</th>
+                  <th data-i18n="table.note">備註</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody id="tx-tbody"></tbody>
             </table>
-            <div id="tx-empty" class="empty">尚無交易</div>
+            <div id="tx-empty" class="empty" data-i18n="empty.no_transactions">尚無交易</div>
           </div>
         </section>
 
         <!-- ============ 圖表 ============ -->
         <section id="tab-charts" class="tab-content">
           <div class="card">
-            <div class="card-header">近 6 個月收入 vs 支出</div>
+            <div class="card-header" data-i18n="chart.trend">近 6 個月收入 vs 支出</div>
             <div class="chart-wrap"><canvas id="chart-trend"></canvas></div>
           </div>
           <div class="card">
-            <div class="card-header">本月支出組成</div>
+            <div class="card-header" data-i18n="chart.pie">本月支出組成</div>
             <div class="chart-wrap"><canvas id="chart-pie"></canvas></div>
           </div>
           <div class="card">
-            <div class="card-header">本月各類別預算使用率</div>
+            <div class="card-header" data-i18n="chart.budget_usage">本月各類別預算使用率</div>
             <div class="chart-wrap"><canvas id="chart-budgets"></canvas></div>
           </div>
         </section>
@@ -132,16 +132,16 @@
         <section id="tab-categories" class="tab-content">
           <div class="card">
             <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
-              <span>支出分類</span>
-              <button id="btn-add-cat-expense" class="btn-primary">+ 新增支出分類</button>
+              <span data-i18n="categories.expense">支出分類</span>
+              <button id="btn-add-cat-expense" class="btn-primary" data-i18n="categories.add_expense">+ 新增支出分類</button>
             </div>
-            <p class="hint">各記帳本的分類獨立不共用。刪除分類會一併移除其預算設定,原有交易自動改歸「其他」。</p>
+            <p class="hint" data-i18n="categories.hint">各記帳本的分類獨立不共用。刪除分類會一併移除其預算設定,原有交易自動改歸「其他」。</p>
             <div id="cat-list-expense" class="chip-grid"></div>
           </div>
           <div class="card">
             <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
-              <span>收入分類</span>
-              <button id="btn-add-cat-income" class="btn-primary">+ 新增收入分類</button>
+              <span data-i18n="categories.income">收入分類</span>
+              <button id="btn-add-cat-income" class="btn-primary" data-i18n="categories.add_income">+ 新增收入分類</button>
             </div>
             <div id="cat-list-income" class="chip-grid"></div>
           </div>
@@ -150,8 +150,8 @@
         <!-- ============ 預算 ============ -->
         <section id="tab-budgets" class="tab-content">
           <div class="card">
-            <div class="card-header">本月預算管理</div>
-            <p class="hint">為支出分類設定月度上限,使用率達 80% 會警示,超出會推播。</p>
+            <div class="card-header" data-i18n="budgets.title">本月預算管理</div>
+            <p class="hint" data-i18n="budgets.hint">為支出分類設定月度上限,使用率達 80% 會警示,超出會推播。</p>
             <div id="budget-list"></div>
           </div>
         </section>
@@ -159,26 +159,26 @@
         <!-- ============ 固定支出 ============ -->
         <section id="tab-recurring" class="tab-content">
           <div class="card">
-            <div class="card-header">固定支出(自動記帳)</div>
-            <p class="hint">設定每月固定日期自動寫入(房租、訂閱、保險等)。HA 每天 09:00 自動執行檢查。</p>
+            <div class="card-header" data-i18n="recurring.title">固定支出(自動記帳)</div>
+            <p class="hint" data-i18n="recurring.hint">設定每月固定日期自動寫入(房租、訂閱、保險等)。HA 每天 09:00 自動執行檢查。</p>
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>名稱</th>
-                  <th>類型</th>
-                  <th>分類</th>
-                  <th style="text-align:right">金額</th>
-                  <th style="text-align:center">每月</th>
-                  <th>上次執行</th>
+                  <th data-i18n="table.name">名稱</th>
+                  <th data-i18n="table.type">類型</th>
+                  <th data-i18n="table.category">分類</th>
+                  <th style="text-align:right" data-i18n="table.amount">金額</th>
+                  <th style="text-align:center" data-i18n="table.monthly_day">每月</th>
+                  <th data-i18n="table.last_run">上次執行</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody id="recurring-tbody"></tbody>
             </table>
-            <div id="recurring-empty" class="empty">尚未設定固定支出</div>
+            <div id="recurring-empty" class="empty" data-i18n="empty.no_recurring">尚未設定固定支出</div>
             <div class="form-actions" style="margin-top:12px">
-              <button id="btn-add-recurring" class="btn-primary">+ 新增固定支出</button>
-              <button id="btn-run-recurring" class="btn-secondary">立即執行檢查</button>
+              <button id="btn-add-recurring" class="btn-primary" data-i18n="recurring.add">+ 新增固定支出</button>
+              <button id="btn-run-recurring" class="btn-secondary" data-i18n="recurring.run">立即執行檢查</button>
             </div>
           </div>
         </section>
@@ -186,28 +186,41 @@
         <!-- ============ 設定 ============ -->
         <section id="tab-settings" class="tab-content">
           <div class="card">
-            <div class="card-header">記帳本管理</div>
+            <div class="card-header" data-i18n="settings.books">記帳本管理</div>
             <table class="data-table">
-              <thead><tr><th>名稱</th><th>幣別</th><th>交易數</th><th></th></tr></thead>
+              <thead><tr><th data-i18n="table.name">名稱</th><th data-i18n="table.currency">幣別</th><th data-i18n="table.transaction_count">交易數</th><th></th></tr></thead>
               <tbody id="books-tbody"></tbody>
             </table>
             <div class="form-actions" style="margin-top:12px">
-              <button id="btn-new-book" class="btn-primary">+ 新增記帳本</button>
+              <button id="btn-new-book" class="btn-primary" data-i18n="settings.new_book">+ 新增記帳本</button>
             </div>
           </div>
           <div class="card">
-            <div class="card-header">資料管理</div>
+            <div class="card-header" data-i18n="settings.data">資料管理</div>
             <div class="form-actions">
-              <button id="btn-export" class="btn-secondary">匯出 JSON</button>
-              <button id="btn-import" class="btn-secondary">匯入 JSON</button>
-              <button id="btn-load-sample" class="btn-secondary">載入範例</button>
-              <button id="btn-clear" class="btn-danger">清空目前記帳本</button>
+              <button id="btn-export" class="btn-secondary" data-i18n="settings.export">匯出 JSON</button>
+              <button id="btn-import" class="btn-secondary" data-i18n="settings.import">匯入 JSON</button>
+              <button id="btn-load-sample" class="btn-secondary" data-i18n="settings.load_sample">載入範例</button>
+              <button id="btn-clear" class="btn-danger" data-i18n="settings.clear">清空目前記帳本</button>
             </div>
             <input type="file" id="import-file" accept=".json,application/json" style="display:none" />
           </div>
           <div class="card">
-            <div class="card-header">關於</div>
-            <p class="hint">記帳本 v1.0.0 — 整合於 Home Assistant,資料存在 HA storage 並隨著系統備份。</p>
+            <div class="card-header" data-i18n="settings.language">語系</div>
+            <div class="form-row">
+              <label for="language-select" data-i18n="settings.language">語系</label>
+              <select id="language-select">
+                <option value="auto" data-i18n="language.auto">自動（跟隨 Home Assistant）</option>
+                <option value="en" data-i18n="language.en">English</option>
+                <option value="zh-Hant" data-i18n="language.zh-Hant">繁體中文</option>
+                <option value="zh-Hans" data-i18n="language.zh-Hans">簡體中文</option>
+              </select>
+              <p class="hint" data-i18n="settings.language_hint">自動模式會跟隨 Home Assistant 語系。你也可以在此瀏覽器手動指定語系。</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header" data-i18n="settings.about">關於</div>
+            <p class="hint" data-i18n="settings.about_text">記帳本 v1.1.0 — 整合於 Home Assistant,資料存在 HA storage 並隨著系統備份。</p>
           </div>
         </section>
       </main>
@@ -221,44 +234,44 @@
     <div id="modal-tx" class="modal-overlay" style="display:none">
       <div class="modal">
         <div class="modal-header">
-          <span id="modal-tx-title">新增交易</span>
+          <span id="modal-tx-title" data-i18n="modal.transaction.title">新增交易</span>
           <button class="modal-close" data-close="modal-tx">×</button>
         </div>
         <div class="modal-body">
           <div class="tx-type-switch">
-            <button class="tx-type-btn active" data-type="expense">支出</button>
-            <button class="tx-type-btn" data-type="income">收入</button>
+            <button class="tx-type-btn active" data-type="expense" data-i18n="type.expense">支出</button>
+            <button class="tx-type-btn" data-type="income" data-i18n="type.income">收入</button>
           </div>
           <div class="form-row">
-            <label>金額</label>
-            <input type="number" id="tx-amount" step="1" min="0" placeholder="例如 350" />
+            <label data-i18n="field.amount">金額</label>
+            <input type="number" id="tx-amount" step="1" min="0" placeholder="例如 350" data-i18n-placeholder="placeholder.amount" />
           </div>
           <div class="form-row">
-            <label>分類</label>
+            <label data-i18n="field.category">分類</label>
             <div id="tx-cat-picker" class="chip-grid"></div>
           </div>
           <div class="form-row">
-            <label>日期</label>
+            <label data-i18n="field.date">日期</label>
             <input type="date" id="tx-date" />
           </div>
           <div class="form-row">
-            <label>時間</label>
+            <label data-i18n="field.time">時間</label>
             <div class="time-picker">
-              <select id="tx-ampm"><option value="am">上午</option><option value="pm">下午</option></select>
+              <select id="tx-ampm"><option value="am" data-i18n="time.am">上午</option><option value="pm" data-i18n="time.pm">下午</option></select>
               <select id="tx-hour"></select>
-              <span>點</span>
+              <span data-i18n="time.hour">點</span>
               <select id="tx-minute"></select>
-              <span>分</span>
+              <span data-i18n="time.minute">分</span>
             </div>
           </div>
           <div class="form-row">
-            <label>備註</label>
-            <input type="text" id="tx-note" placeholder="選填,例如「便當」" />
+            <label data-i18n="field.note">備註</label>
+            <input type="text" id="tx-note" placeholder="選填,例如「便當」" data-i18n-placeholder="placeholder.note" />
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn-secondary" data-close="modal-tx">取消</button>
-          <button id="tx-submit" class="btn-primary">儲存</button>
+          <button class="btn-secondary" data-close="modal-tx" data-i18n="action.cancel">取消</button>
+          <button id="tx-submit" class="btn-primary" data-i18n="action.save">儲存</button>
         </div>
       </div>
     </div>
@@ -267,22 +280,22 @@
     <div id="modal-book" class="modal-overlay" style="display:none">
       <div class="modal">
         <div class="modal-header">
-          <span id="modal-book-title">新增記帳本</span>
+          <span id="modal-book-title" data-i18n="modal.book.title">新增記帳本</span>
           <button class="modal-close" data-close="modal-book">×</button>
         </div>
         <div class="modal-body">
           <div class="form-row">
-            <label>名稱</label>
-            <input type="text" id="book-name" placeholder="例如「日常開銷」「旅遊基金」" />
+            <label data-i18n="field.name">名稱</label>
+            <input type="text" id="book-name" placeholder="例如「日常開銷」「旅遊基金」" data-i18n-placeholder="placeholder.book_name" />
           </div>
           <div class="form-row">
-            <label>幣別</label>
+            <label data-i18n="field.currency">幣別</label>
             <input type="text" id="book-currency" value="TWD" />
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn-secondary" data-close="modal-book">取消</button>
-          <button id="book-submit" class="btn-primary">建立</button>
+          <button class="btn-secondary" data-close="modal-book" data-i18n="action.cancel">取消</button>
+          <button id="book-submit" class="btn-primary" data-i18n="action.create">建立</button>
         </div>
       </div>
     </div>
@@ -291,41 +304,41 @@
     <div id="modal-recurring" class="modal-overlay" style="display:none">
       <div class="modal">
         <div class="modal-header">
-          <span>新增固定支出</span>
+          <span data-i18n="modal.recurring.title">新增固定支出</span>
           <button class="modal-close" data-close="modal-recurring">×</button>
         </div>
         <div class="modal-body">
           <div class="form-row">
-            <label>名稱</label>
-            <input type="text" id="rec-name" placeholder="例如「房租」「Netflix」" />
+            <label data-i18n="field.name">名稱</label>
+            <input type="text" id="rec-name" placeholder="例如「房租」「Netflix」" data-i18n-placeholder="placeholder.recurring_name" />
           </div>
           <div class="form-row">
-            <label>類型</label>
+            <label data-i18n="field.type">類型</label>
             <select id="rec-type">
-              <option value="expense">支出</option>
-              <option value="income">收入</option>
+              <option value="expense" data-i18n="type.expense">支出</option>
+              <option value="income" data-i18n="type.income">收入</option>
             </select>
           </div>
           <div class="form-row">
-            <label>金額</label>
+            <label data-i18n="field.amount">金額</label>
             <input type="number" id="rec-amount" step="1" min="0" />
           </div>
           <div class="form-row">
-            <label>分類</label>
+            <label data-i18n="field.category">分類</label>
             <select id="rec-category"></select>
           </div>
           <div class="form-row">
-            <label>每月幾號</label>
+            <label data-i18n="field.day_of_month">每月幾號</label>
             <input type="number" id="rec-day" min="1" max="31" value="1" />
           </div>
           <div class="form-row">
-            <label>備註</label>
-            <input type="text" id="rec-note" placeholder="選填" />
+            <label data-i18n="field.note">備註</label>
+            <input type="text" id="rec-note" placeholder="選填" data-i18n-placeholder="placeholder.optional" />
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn-secondary" data-close="modal-recurring">取消</button>
-          <button id="rec-submit" class="btn-primary">建立</button>
+          <button class="btn-secondary" data-close="modal-recurring" data-i18n="action.cancel">取消</button>
+          <button id="rec-submit" class="btn-primary" data-i18n="action.create">建立</button>
         </div>
       </div>
     </div>
@@ -334,22 +347,22 @@
     <div id="modal-budget" class="modal-overlay" style="display:none">
       <div class="modal">
         <div class="modal-header">
-          <span id="modal-budget-title">設定預算</span>
+          <span id="modal-budget-title" data-i18n="modal.budget.title">設定預算</span>
           <button class="modal-close" data-close="modal-budget">×</button>
         </div>
         <div class="modal-body">
           <div class="form-row">
-            <label id="budget-cat-label">分類</label>
+            <label id="budget-cat-label" data-i18n="field.category">分類</label>
             <input type="hidden" id="budget-cat-id" />
           </div>
           <div class="form-row">
-            <label>每月上限 (留空或填 0 移除預算)</label>
+            <label data-i18n="field.monthly_limit">每月上限 (留空或填 0 移除預算)</label>
             <input type="number" id="budget-amount" step="100" min="0" />
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn-secondary" data-close="modal-budget">取消</button>
-          <button id="budget-submit" class="btn-primary">儲存</button>
+          <button class="btn-secondary" data-close="modal-budget" data-i18n="action.cancel">取消</button>
+          <button id="budget-submit" class="btn-primary" data-i18n="action.save">儲存</button>
         </div>
       </div>
     </div>
@@ -357,31 +370,31 @@
     <div id="modal-cat" class="modal-overlay" style="display:none">
       <div class="modal">
         <div class="modal-header">
-          <span id="modal-cat-title">新增分類</span>
+          <span id="modal-cat-title" data-i18n="modal.category.title">新增分類</span>
           <button class="modal-close" data-close="modal-cat">×</button>
         </div>
         <div class="modal-body">
           <div class="form-row">
-            <label>分類名稱</label>
-            <input type="text" id="cat-name" placeholder="例如:寵物、保險" />
+            <label data-i18n="field.category_name">分類名稱</label>
+            <input type="text" id="cat-name" placeholder="例如:寵物、保險" data-i18n-placeholder="placeholder.category_name" />
           </div>
           <div class="form-row">
-            <label>顏色</label>
+            <label data-i18n="field.color">顏色</label>
             <input type="color" id="cat-color" value="#E67E22" style="width:60px;height:38px;padding:2px" />
           </div>
           <div class="form-row">
-            <label>圖示 (選填,mdi 名稱)</label>
+            <label data-i18n="field.icon">圖示 (選填,mdi 名稱)</label>
             <input type="text" id="cat-icon" placeholder="mdi:tag" />
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn-secondary" data-close="modal-cat">取消</button>
-          <button id="cat-submit" class="btn-primary">新增</button>
+          <button class="btn-secondary" data-close="modal-cat" data-i18n="action.cancel">取消</button>
+          <button id="cat-submit" class="btn-primary" data-i18n="action.add">新增</button>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

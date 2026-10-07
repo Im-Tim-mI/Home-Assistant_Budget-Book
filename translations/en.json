@@ -1,0 +1,16 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Budget Book setup",
+        "description": "The first installation automatically creates a default budget book. You can also load sample data for a quick demo.",
+        "data": {
+          "load_sample": "Load sample data (two budget books + budgets + recurring entries)"
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Budget Book can only be configured once"
+    }
+  }
+}
