@@ -24,7 +24,7 @@ Current release: `v1.1.1`
 
 ### Mobile
 
-![Mobile overview screen](docs/images/screenshot-mobile-overview.png)
+![Mobile overview screen](docs/images/screenshot-mobile-overview-en.png)
 
 ## Features
 
