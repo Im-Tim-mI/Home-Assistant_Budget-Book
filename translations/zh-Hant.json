@@ -1,0 +1,16 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "記帳本設定",
+        "description": "首次安裝會自動建立預設記帳本。你也可以選擇載入範例資料快速體驗。",
+        "data": {
+          "load_sample": "載入範例資料(兩本記帳本 + 預算 + 固定支出)"
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "記帳本只能設定一次"
+    }
+  }
+}

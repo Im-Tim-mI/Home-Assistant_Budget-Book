@@ -1,0 +1,12 @@
+{
+  "domain": "budget_book",
+  "name": "記帳本 (Budget Book)",
+  "version": "1.0.0",
+  "documentation": "https://github.com/Im-Tim-mI/budget_book",
+  "issue_tracker": "https://github.com/Im-Tim-mI/budget_book/issues",
+  "dependencies": ["http", "frontend"],
+  "codeowners": [],
+  "requirements": [],
+  "iot_class": "local_polling",
+  "config_flow": true
+}

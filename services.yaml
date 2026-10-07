@@ -1,0 +1,200 @@
+add_transaction:
+  name: 新增交易
+  description: 新增一筆收入或支出
+  fields:
+    book_id:
+      name: 記帳本 ID
+      description: 留空使用目前選定的記帳本
+      required: false
+      selector: { text: }
+    date:
+      name: 日期
+      required: true
+      example: "2026-05-27"
+      selector: { date: }
+    time:
+      name: 時間
+      description: 24 小時制 HH:MM,選填
+      required: false
+      example: "14:30"
+      selector: { text: }
+    type:
+      name: 類型
+      required: true
+      selector:
+        select:
+          options: ["income", "expense"]
+    amount:
+      name: 金額
+      required: true
+      example: 250
+      selector: { number: { min: 0, max: 9999999, step: 0.01, mode: box } }
+    category:
+      name: 分類 ID
+      required: false
+      example: "food"
+      selector: { text: }
+    note:
+      name: 備註
+      required: false
+      selector: { text: }
+
+delete_transaction:
+  name: 刪除交易
+  fields:
+    book_id:
+      required: false
+      selector: { text: }
+    transaction_id:
+      required: true
+      selector: { text: }
+
+create_book:
+  name: 建立記帳本
+  fields:
+    name:
+      required: true
+      selector: { text: }
+    currency:
+      required: false
+      example: "TWD"
+      selector: { text: }
+
+delete_book:
+  name: 刪除記帳本
+  fields:
+    book_id:
+      required: true
+      selector: { text: }
+
+rename_book:
+  name: 重新命名記帳本
+  fields:
+    book_id:
+      required: true
+      selector: { text: }
+    name:
+      required: true
+      selector: { text: }
+
+set_active_book:
+  name: 切換目前記帳本
+  fields:
+    book_id:
+      required: true
+      selector: { text: }
+
+set_budget:
+  name: 設定預算
+  fields:
+    book_id:
+      required: false
+      selector: { text: }
+    category:
+      required: true
+      selector: { text: }
+    amount:
+      required: false
+      description: 留空或填 0 移除預算
+      selector: { number: { min: 0, max: 9999999, step: 100, mode: box } }
+
+add_category:
+  name: 新增分類
+  description: 為目前(或指定)記帳本新增收入或支出分類。各記帳本分類獨立不共用。
+  fields:
+    book_id:
+      name: 記帳本 ID
+      description: 留空使用目前選定的記帳本
+      required: false
+      selector: { text: }
+    name:
+      name: 分類名稱
+      required: true
+      example: "寵物"
+      selector: { text: }
+    type:
+      name: 類型
+      required: true
+      selector:
+        select:
+          options: ["income", "expense"]
+    icon:
+      name: 圖示 (mdi)
+      required: false
+      example: "mdi:dog"
+      selector: { text: }
+    color:
+      name: 顏色
+      required: false
+      example: "#E67E22"
+      selector: { text: }
+
+delete_category:
+  name: 刪除分類
+  description: 刪除分類,並同步移除該分類的預算設定。原有交易會改歸到「其他」。
+  fields:
+    book_id:
+      name: 記帳本 ID
+      required: false
+      selector: { text: }
+    category:
+      name: 分類 ID
+      required: true
+      selector: { text: }
+
+add_recurring:
+  name: 新增固定支出
+  fields:
+    book_id:
+      required: false
+      selector: { text: }
+    name:
+      required: true
+      selector: { text: }
+    type:
+      required: false
+      selector:
+        select:
+          options: ["income", "expense"]
+    amount:
+      required: true
+      selector: { number: { min: 0, max: 9999999, step: 1, mode: box } }
+    category:
+      required: false
+      selector: { text: }
+    day_of_month:
+      required: true
+      selector: { number: { min: 1, max: 31, mode: box } }
+    note:
+      required: false
+      selector: { text: }
+
+delete_recurring:
+  name: 刪除固定支出
+  fields:
+    book_id:
+      required: false
+      selector: { text: }
+    recurring_id:
+      required: true
+      selector: { text: }
+
+run_recurring:
+  name: 立即執行固定支出檢查
+  description: 手動觸發每日固定支出注入
+
+load_sample:
+  name: 載入範例資料
+  description: 覆蓋現有資料,載入兩本範例記帳本
+
+clear_all:
+  name: 清空目前記帳本
+  description: 清除目前記帳本的所有交易、預算和固定支出
+
+replace_data:
+  name: 完整匯入資料
+  description: 用 JSON 完全取代資料(給匯入功能用)
+  fields:
+    data:
+      required: true
+      selector: { object: }
