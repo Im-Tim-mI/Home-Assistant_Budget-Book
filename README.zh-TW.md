@@ -4,13 +4,19 @@
 
 Home Assistant 自訂整合，提供側邊欄記帳面板、收支統計、分類預算、固定支出與資料匯入匯出功能。資料儲存在 Home Assistant storage，會跟著 HA 備份一起保存。
 
+目前版本：`v1.1.1`
+
 ## 軟體截圖
 
 ### 桌面版
 
-| 總覽 | 交易 |
+| 總覽 | 英文介面 |
 | --- | --- |
-| ![總覽畫面](docs/images/screenshot-overview.png) | ![交易畫面](docs/images/screenshot-transactions.png) |
+| ![總覽畫面](docs/images/screenshot-overview.png) | ![英文總覽畫面](docs/images/screenshot-overview-en.png) |
+
+| 交易 | 語系設定 |
+| --- | --- |
+| ![交易畫面](docs/images/screenshot-transactions.png) | ![語系設定畫面](docs/images/screenshot-settings-language.png) |
 
 | 圖表 | 預算 |
 | --- | --- |
@@ -31,6 +37,7 @@ Home Assistant 自訂整合，提供側邊欄記帳面板、收支統計、分�
 - JSON 匯入、匯出與範例資料載入。
 - 內建英文、繁體中文、簡體中文介面語系。
 - 自動語系會跟隨 Home Assistant 語系，也可在記帳本設定中手動指定。
+- 服務呼叫後會自動刷新前端狀態，新增、刪除、匯入或切換資料後不需要重新載入 Home Assistant 頁面。
 
 ## 語系
 
@@ -42,7 +49,25 @@ Home Assistant 自訂整合，提供側邊欄記帳面板、收支統計、分�
 
 未來若要新增語系，可以新增一份同 key 的 JSON 檔，再到 `www/app.js` 註冊該語系。
 
+## 狀態同步
+
+記帳本會從父層 Home Assistant 前端讀取狀態。由於 Home Assistant 收到新狀態時可能會替換 `hass` 物件，記帳本現在會在每次輪詢前重新取得目前的 `hass`，並在服務呼叫成功後安排短延遲刷新。這可以避免新增交易、刪除交易、匯入資料或切換記帳本後畫面停在舊資料。
+
 ## 安裝教學
+
+### Release ZIP
+
+到最新 Release 下載 ZIP：
+
+<https://github.com/Im-Tim-mI/budget_book/releases/latest>
+
+解壓縮後，將 `budget_book` 資料夾放到：
+
+```bash
+/config/custom_components/budget_book
+```
+
+複製完成後重新啟動 Home Assistant。
 
 ### 手動安裝
 
@@ -73,7 +98,7 @@ cd /config/custom_components/budget_book
 git pull
 ```
 
-更新後重新啟動 Home Assistant。
+若你是用 ZIP 安裝，請重新下載最新 Release ZIP，並覆蓋原本的 `budget_book` 資料夾。更新後重新啟動 Home Assistant。若仍看到舊畫面，請清除瀏覽器或 App WebView 快取，或重新載入一次 Home Assistant。
 
 ## 服務
 

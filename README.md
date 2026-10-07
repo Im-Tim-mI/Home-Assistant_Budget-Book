@@ -4,13 +4,19 @@
 
 A Home Assistant custom integration that adds a sidebar budgeting panel with transaction tracking, income and expense summaries, category budgets, recurring expenses, and JSON import/export. Data is stored in Home Assistant storage, so it is included with your regular HA backups.
 
+Current release: `v1.1.1`
+
 ## Screenshots
 
 ### Desktop
 
-| Overview | Transactions |
+| Overview | English UI |
 | --- | --- |
-| ![Overview screen](docs/images/screenshot-overview.png) | ![Transactions screen](docs/images/screenshot-transactions.png) |
+| ![Overview screen](docs/images/screenshot-overview.png) | ![English overview screen](docs/images/screenshot-overview-en.png) |
+
+| Transactions | Language settings |
+| --- | --- |
+| ![Transactions screen](docs/images/screenshot-transactions.png) | ![Language settings screen](docs/images/screenshot-settings-language.png) |
 
 | Charts | Budgets |
 | --- | --- |
@@ -31,6 +37,7 @@ A Home Assistant custom integration that adds a sidebar budgeting panel with tra
 - Import, export, and load sample data as JSON.
 - Built-in interface languages: English, Traditional Chinese, and Simplified Chinese.
 - Auto language mode follows the Home Assistant language, with an optional manual override in Budget Book settings.
+- Frontend state refreshes after service calls, so newly added, edited, imported, or deleted entries appear without reloading the Home Assistant page.
 
 ## Languages
 
@@ -42,7 +49,25 @@ Budget Book stores frontend language files in `www/locales/`:
 
 To add another language later, add a new JSON file with the same keys, then register the language in `www/app.js`.
 
+## State Refresh
+
+Budget Book reads state from the parent Home Assistant frontend. Since Home Assistant can replace the `hass` object when new states arrive, the panel refreshes the current `hass` reference before polling and schedules short follow-up refreshes after service calls. This avoids stale screens after adding entries, deleting entries, importing data, or changing books.
+
 ## Installation
+
+### Release ZIP
+
+Download the latest release ZIP from:
+
+<https://github.com/Im-Tim-mI/budget_book/releases/latest>
+
+Extract it and copy the `budget_book` folder to:
+
+```bash
+/config/custom_components/budget_book
+```
+
+Restart Home Assistant after copying the files.
 
 ### Manual Installation
 
@@ -73,7 +98,7 @@ cd /config/custom_components/budget_book
 git pull
 ```
 
-Restart Home Assistant after updating.
+If you installed from a ZIP file, download the latest release ZIP again and replace the existing `budget_book` folder. Restart Home Assistant after updating. If the old panel is still visible, clear the browser/app WebView cache or reload Home Assistant once.
 
 ## Services
 
