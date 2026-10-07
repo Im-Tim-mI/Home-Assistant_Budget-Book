@@ -1,55 +1,57 @@
-# 記帳本 (Budget Book)
+# Budget Book
 
-Home Assistant 自訂整合，提供側邊欄記帳面板、收支統計、分類預算、固定支出與資料匯入匯出功能。資料儲存在 Home Assistant storage，會跟著 HA 備份一起保存。
+[繁體中文](README.zh-TW.md)
 
-![記帳本軟體畫面](docs/images/screenshot-overview.png)
+A Home Assistant custom integration that adds a sidebar budgeting panel with transaction tracking, income and expense summaries, category budgets, recurring expenses, and JSON import/export. Data is stored in Home Assistant storage, so it is included with your regular HA backups.
 
-## 功能
+![Budget Book screenshot](docs/images/screenshot-overview.png)
 
-- 多本記帳本管理，可分開紀錄家庭、個人或專案支出。
-- 收入、支出、分類、備註與日期時間紀錄。
-- 月度支出、收入、結餘與總結餘統計。
-- 分類支出、近 6 個月趨勢與預算使用率圖表。
-- 每月分類預算與 80% / 超支提醒。
-- 固定支出規則，每天 09:00 自動檢查並寫入到期項目。
-- JSON 匯入、匯出與範例資料載入。
+## Features
 
-## 安裝教學
+- Manage multiple budget books for household, personal, or project expenses.
+- Record income and expenses with categories, notes, dates, and times.
+- Track monthly expenses, monthly income, monthly balance, and total balance.
+- View category spending, six-month trends, and budget usage charts.
+- Set monthly category budgets with 80% warning and over-budget alerts.
+- Configure recurring monthly entries that are checked automatically every day at 09:00.
+- Import, export, and load sample data as JSON.
 
-### 手動安裝
+## Installation
 
-1. 在 Home Assistant 的設定目錄建立整合資料夾：
+### Manual Installation
+
+1. Create the integration directory in your Home Assistant config folder:
 
    ```bash
    mkdir -p /config/custom_components/budget_book
    ```
 
-2. 將本專案內容複製到該資料夾。若在 HA 主機上可直接使用 Git：
+2. Copy this project into that directory. If Git is available on your Home Assistant host, you can clone it directly:
 
    ```bash
    git clone https://github.com/Im-Tim-mI/budget_book.git /config/custom_components/budget_book
    ```
 
-3. 重新啟動 Home Assistant。
+3. Restart Home Assistant.
 
-4. 到「設定」→「裝置與服務」→「新增整合」，搜尋「記帳本」或「Budget Book」並加入。
+4. Go to Settings -> Devices & services -> Add integration, then search for "Budget Book" or "記帳本" and add it.
 
-5. 加入完成後，左側側邊欄會出現「記帳本」。第一次開啟可先載入範例資料或直接新增交易。
+5. After the integration is added, "記帳本" will appear in the Home Assistant sidebar. Open it to start adding transactions or load the sample data first.
 
-### 更新
+### Updating
 
-若使用 Git 安裝：
+If you installed with Git:
 
 ```bash
 cd /config/custom_components/budget_book
 git pull
 ```
 
-更新後重新啟動 Home Assistant。
+Restart Home Assistant after updating.
 
-## 服務
+## Services
 
-整合提供 `budget_book` domain 服務，可從自動化或開發者工具呼叫，例如：
+The integration provides services under the `budget_book` domain. They can be called from automations or Developer Tools, for example:
 
 - `budget_book.add_transaction`
 - `budget_book.delete_transaction`
@@ -60,9 +62,9 @@ git pull
 - `budget_book.run_recurring`
 - `budget_book.replace_data`
 
-詳細欄位可參考 `services.yaml`。
+See `services.yaml` for the full field definitions.
 
-## 授權
+## License
 
-本專案採用 MIT License。
+This project is licensed under the MIT License.
 
