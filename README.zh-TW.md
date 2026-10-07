@@ -1,6 +1,6 @@
-# 記帳本 (Budget Book)
+# Home-Assistant 記帳本 (Budget Book)
 
-[English](README.md)
+[English](README.md) | [简体中文](README.zh-CN.md)
 
 Home Assistant 自訂整合，提供側邊欄記帳面板、收支統計、分類預算、固定支出與資料匯入匯出功能。資料儲存在 Home Assistant storage，會跟著 HA 備份一起保存。
 
@@ -59,7 +59,7 @@ Home Assistant 自訂整合，提供側邊欄記帳面板、收支統計、分�
 
 到最新 Release 下載 ZIP：
 
-<https://github.com/Im-Tim-mI/budget_book/releases/latest>
+<https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book/releases/latest>
 
 解壓縮後，將 `budget_book` 資料夾放到：
 
@@ -80,12 +80,12 @@ Home Assistant 自訂整合，提供側邊欄記帳面板、收支統計、分�
 2. 將本專案內容複製到該資料夾。若在 HA 主機上可直接使用 Git：
 
    ```bash
-   git clone https://github.com/Im-Tim-mI/budget_book.git /config/custom_components/budget_book
+   git clone https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book.git /config/custom_components/budget_book
    ```
 
 3. 重新啟動 Home Assistant。
 
-4. 到「設定」→「裝置與服務」→「新增整合」，搜尋「記帳本」或「Budget Book」並加入。
+4. 到「設定」→「裝置與服務」→「新增整合」，搜尋「Home-Assistant 記帳本」、「記帳本」或「Budget Book」並加入。
 
 5. 加入完成後，左側側邊欄會出現「記帳本」。第一次開啟可先載入範例資料或直接新增交易。
 

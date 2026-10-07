@@ -1,6 +1,6 @@
-# Budget Book
+# Home-Assistant 記帳本 (Budget Book)
 
-[繁體中文](README.zh-TW.md)
+[繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md)
 
 A Home Assistant custom integration that adds a sidebar budgeting panel with transaction tracking, income and expense summaries, category budgets, recurring expenses, and JSON import/export. Data is stored in Home Assistant storage, so it is included with your regular HA backups.
 
@@ -59,7 +59,7 @@ Budget Book reads state from the parent Home Assistant frontend. Since Home Assi
 
 Download the latest release ZIP from:
 
-<https://github.com/Im-Tim-mI/budget_book/releases/latest>
+<https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book/releases/latest>
 
 Extract it and copy the `budget_book` folder to:
 
@@ -80,12 +80,12 @@ Restart Home Assistant after copying the files.
 2. Copy this project into that directory. If Git is available on your Home Assistant host, you can clone it directly:
 
    ```bash
-   git clone https://github.com/Im-Tim-mI/budget_book.git /config/custom_components/budget_book
+   git clone https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book.git /config/custom_components/budget_book
    ```
 
 3. Restart Home Assistant.
 
-4. Go to Settings -> Devices & services -> Add integration, then search for "Budget Book" or "記帳本" and add it.
+4. Go to Settings -> Devices & services -> Add integration, then search for "Home-Assistant 記帳本", "Budget Book", or "記帳本" and add it.
 
 5. After the integration is added, "記帳本" will appear in the Home Assistant sidebar. Open it to start adding transactions or load the sample data first.
 
