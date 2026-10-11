@@ -6,7 +6,7 @@
 
 A Home Assistant custom integration that adds a sidebar budgeting panel with transaction tracking, income and expense summaries, category budgets, recurring expenses, and JSON import/export. Data is stored in Home Assistant storage, so it is included with your regular HA backups.
 
-Current release: `v1.1.3`
+Current release: `v1.1.4`
 
 ## Screenshots
 
