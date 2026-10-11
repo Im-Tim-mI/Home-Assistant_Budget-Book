@@ -55,6 +55,21 @@ Home Assistant 自定义集成，提供侧边栏记账面板、收支统计、�
 
 ## 安装教程
 
+### HACS 自定义存储库
+
+1. 在 Home Assistant 中打开 HACS。
+2. 点击右上角三点菜单，选择 `Custom repositories`。
+3. 填入此存储库地址：
+
+   ```text
+   https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book
+   ```
+
+4. Category 选择 `Integration`，然后点击 `ADD`。
+5. 在 HACS 中安装 `Home-Assistant 记账本 (Budget Book)`。
+6. 重新启动 Home Assistant。
+7. 到“设置”→“设备与服务”→“添加集成”，搜索“Home-Assistant 记账本”、“记账本”或“Budget Book”并添加。
+
 ### Release ZIP
 
 到最新 Release 下载 ZIP：

@@ -55,6 +55,21 @@ Budget Book reads state from the parent Home Assistant frontend. Since Home Assi
 
 ## Installation
 
+### HACS Custom Repository
+
+1. Open HACS in Home Assistant.
+2. Open the three-dot menu in the top right and choose `Custom repositories`.
+3. Add this repository URL:
+
+   ```text
+   https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book
+   ```
+
+4. Select `Integration` as the category, then click `ADD`.
+5. Install `Home-Assistant 記帳本 (Budget Book)` from HACS.
+6. Restart Home Assistant.
+7. Go to Settings -> Devices & services -> Add integration, then search for "Home-Assistant 記帳本", "Budget Book", or "記帳本" and add it.
+
 ### Release ZIP
 
 Download the latest release ZIP from:
