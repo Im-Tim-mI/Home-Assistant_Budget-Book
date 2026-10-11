@@ -34,6 +34,7 @@ from .const import (
     SERVICE_REPLACE_DATA,
     SERVICE_RUN_RECURRING,
     SERVICE_SET_BUDGET,
+    SERVICE_UPDATE_TRANSACTION,
     SIGNAL_UPDATE,
     TYPE_EXPENSE,
     TYPE_INCOME,
@@ -161,6 +162,17 @@ DEL_TX_SCHEMA = vol.Schema({
     vol.Required("transaction_id"): cv.string,
 })
 
+UPDATE_TX_SCHEMA = vol.Schema({
+    vol.Optional("book_id"): cv.string,
+    vol.Required("transaction_id"): cv.string,
+    vol.Required("date"): cv.string,
+    vol.Optional("time"): vol.Match(r"^([01]\d|2[0-3]):[0-5]\d$"),
+    vol.Required("type"): vol.In([TYPE_INCOME, TYPE_EXPENSE]),
+    vol.Required("amount"): vol.Coerce(float),
+    vol.Optional("category", default="other"): cv.string,
+    vol.Optional("note", default=""): cv.string,
+})
+
 CREATE_BOOK_SCHEMA = vol.Schema({
     vol.Required("name"): cv.string,
     vol.Optional("currency", default="TWD"): cv.string,
@@ -247,6 +259,19 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         if not book_id:
             return
         await store.async_delete_transaction(book_id, call.data["transaction_id"])
+        async_dispatcher_send(hass, SIGNAL_UPDATE)
+
+    async def handle_update_tx(call: ServiceCall) -> None:
+        store = _get_store(hass)
+        if not store:
+            return
+        book_id = _active_book_id(dict(call.data))
+        if not book_id:
+            return
+        d = dict(call.data)
+        d.pop("book_id", None)
+        tx_id = d.pop("transaction_id")
+        await store.async_update_transaction(book_id, tx_id, d)
         async_dispatcher_send(hass, SIGNAL_UPDATE)
 
     async def handle_create_book(call: ServiceCall) -> None:
@@ -377,6 +402,7 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         async_dispatcher_send(hass, SIGNAL_UPDATE)
 
     hass.services.async_register(DOMAIN, SERVICE_ADD_TRANSACTION, handle_add_tx, schema=ADD_TX_SCHEMA)
+    hass.services.async_register(DOMAIN, SERVICE_UPDATE_TRANSACTION, handle_update_tx, schema=UPDATE_TX_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_DELETE_TRANSACTION, handle_del_tx, schema=DEL_TX_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_CREATE_BOOK, handle_create_book, schema=CREATE_BOOK_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_DELETE_BOOK, handle_delete_book, schema=DELETE_BOOK_SCHEMA)

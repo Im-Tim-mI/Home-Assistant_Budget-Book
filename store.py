@@ -205,6 +205,34 @@ class BudgetStore:
         await self.async_save()
         return tid
 
+    async def async_update_transaction(self, book_id: str, tx_id: str, tx: dict[str, Any]) -> None:
+        book = self._data["books"].get(book_id)
+        if not book:
+            raise ValueError(f"Book {book_id} not found")
+
+        existing = next((t for t in book["transactions"] if t["id"] == tx_id), None)
+        if not existing:
+            raise ValueError(f"Transaction {tx_id} not found")
+
+        try:
+            datetime.strptime(tx["date"], "%Y-%m-%d")
+        except (ValueError, KeyError):
+            try:
+                d = datetime.strptime(tx["date"], "%Y/%m/%d")
+                tx["date"] = d.strftime("%Y-%m-%d")
+            except (ValueError, KeyError):
+                raise ValueError(f"invalid date: {tx.get('date')}")
+
+        existing.update({
+            "date": tx["date"],
+            "time": tx.get("time") or None,
+            "type": tx["type"],
+            "amount": float(tx["amount"]),
+            "category": tx.get("category") or "other",
+            "note": tx.get("note") or "",
+        })
+        await self.async_save()
+
     async def async_delete_transaction(self, book_id: str, tx_id: str) -> None:
         book = self._data["books"].get(book_id)
         if not book:

@@ -82,6 +82,7 @@
   "settings.clear": "Clear current book",
   "settings.active": "Active",
   "modal.transaction.title": "Add transaction",
+  "modal.transaction.edit_title": "Edit transaction",
   "modal.book.title": "New budget book",
   "modal.recurring.title": "Add recurring entry",
   "modal.budget.title": "Set budget",

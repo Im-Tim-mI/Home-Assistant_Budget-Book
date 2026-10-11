@@ -49,6 +49,51 @@ delete_transaction:
       required: true
       selector: { text: }
 
+update_transaction:
+  name: 更新交易
+  description: 更新一筆既有收入或支出
+  fields:
+    book_id:
+      name: 記帳本 ID
+      description: 留空使用目前選定的記帳本
+      required: false
+      selector: { text: }
+    transaction_id:
+      name: 交易 ID
+      required: true
+      selector: { text: }
+    date:
+      name: 日期
+      required: true
+      example: "2026-05-27"
+      selector: { date: }
+    time:
+      name: 時間
+      description: 24 小時制 HH:MM,選填
+      required: false
+      example: "14:30"
+      selector: { text: }
+    type:
+      name: 類型
+      required: true
+      selector:
+        select:
+          options: ["income", "expense"]
+    amount:
+      name: 金額
+      required: true
+      example: 250
+      selector: { number: { min: 0, max: 9999999, step: 0.01, mode: box } }
+    category:
+      name: 分類 ID
+      required: false
+      example: "food"
+      selector: { text: }
+    note:
+      name: 備註
+      required: false
+      selector: { text: }
+
 create_book:
   name: 建立記帳本
   fields:

@@ -453,7 +453,7 @@ function renderHome() {
       const sign = t.type === 'expense' ? '-' : '+';
       const cls = t.type === 'expense' ? 'negative' : 'positive';
       return `
-        <tr>
+        <tr class="clickable" data-tx-id="${t.id}">
           <td>${fmtTxDate(t)}</td>
           <td>${catBadge}</td>
           <td style="text-align:right" class="${cls}">${sign}${fmt(t.amount)}</td>
@@ -461,6 +461,10 @@ function renderHome() {
         </tr>
       `;
     }).join('');
+
+    recentEl.querySelectorAll('tr[data-tx-id]').forEach(row => {
+      row.onclick = () => openEditTxModal(row.dataset.txId);
+    });
   }
 }
 
@@ -532,7 +536,7 @@ function applyTxFilters() {
       const cls = t.type === 'expense' ? 'negative' : 'positive';
       const typeBadge = `<span class="badge badge-${t.type}">${tr(`type.${t.type}`)}</span>`;
       return `
-        <tr>
+        <tr class="clickable" data-tx-id="${t.id}">
           <td>${fmtTxDate(t)}</td>
           <td>${typeBadge}</td>
           <td>${catBadge}</td>
@@ -543,8 +547,13 @@ function applyTxFilters() {
       `;
     }).join('');
 
+    tbody.querySelectorAll('tr[data-tx-id]').forEach(row => {
+      row.onclick = () => openEditTxModal(row.dataset.txId);
+    });
+
     tbody.querySelectorAll('.del-btn').forEach(b => {
-      b.onclick = async () => {
+      b.onclick = async (ev) => {
+        ev.stopPropagation();
         if (!confirm(tr('confirm.delete_transaction'))) return;
         try {
           await callService('budget_book', 'delete_transaction', { transaction_id: b.dataset.txId });
@@ -845,6 +854,15 @@ function setTimePicker(d) {
   $('tx-minute').value = String(d.getMinutes()).padStart(2, '0');
 }
 
+function setTimePickerValue(value) {
+  if (!$('tx-hour').options.length) initTimePicker();
+  const [rawHour, rawMinute] = String(value || '00:00').split(':');
+  const h24 = parseInt(rawHour, 10) || 0;
+  $('tx-ampm').value = h24 < 12 ? 'am' : 'pm';
+  $('tx-hour').value = String(h24 % 12 === 0 ? 12 : h24 % 12);
+  $('tx-minute').value = String(parseInt(rawMinute, 10) || 0).padStart(2, '0');
+}
+
 function getTimePicker() {
   let h = parseInt($('tx-hour').value, 10) % 12;
   if ($('tx-ampm').value === 'pm') h += 12;
@@ -882,6 +900,27 @@ function openTxModal() {
   setTimePicker(now);
   document.querySelectorAll('.tx-type-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.type === 'expense');
+  });
+  renderCatPicker();
+  openModal('modal-tx');
+  setTimeout(() => $('tx-amount').focus(), 100);
+}
+
+function openEditTxModal(txId) {
+  const book = getActiveBook();
+  const tx = book?.transactions.find(t => t.id === txId);
+  if (!tx) return;
+
+  modalTxType = tx.type;
+  modalTxCategory = tx.category;
+  editingTxId = tx.id;
+  setText('modal-tx-title', 'modal.transaction.edit_title');
+  $('tx-amount').value = tx.amount;
+  $('tx-note').value = tx.note || '';
+  $('tx-date').value = tx.date;
+  setTimePickerValue(tx.time);
+  document.querySelectorAll('.tx-type-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.type === modalTxType);
   });
   renderCatPicker();
   openModal('modal-tx');
@@ -1006,9 +1045,15 @@ function bindEvents() {
     if (!date) { alert(t('alert.required_date')); return; }
     if (!modalTxCategory) { alert(t('alert.required_category')); return; }
     try {
-      await callService('budget_book', 'add_transaction', {
-        date, time, type: modalTxType, amount, category: modalTxCategory, note
-      });
+      const payload = { date, time, type: modalTxType, amount, category: modalTxCategory, note };
+      if (editingTxId) {
+        await callService('budget_book', 'update_transaction', {
+          transaction_id: editingTxId,
+          ...payload
+        });
+      } else {
+        await callService('budget_book', 'add_transaction', payload);
+      }
       closeModal('modal-tx');
     } catch (e) { alert(t('alert.add_failed', { message: e.message })); }
   };

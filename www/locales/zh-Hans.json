@@ -82,6 +82,7 @@
   "settings.clear": "清空当前记账本",
   "settings.active": "使用中",
   "modal.transaction.title": "新增交易",
+  "modal.transaction.edit_title": "编辑交易",
   "modal.book.title": "新增记账本",
   "modal.recurring.title": "新增固定支出",
   "modal.budget.title": "设置预算",

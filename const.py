@@ -8,6 +8,7 @@ STORAGE_KEY = f"{DOMAIN}_data"
 
 # Services
 SERVICE_ADD_TRANSACTION = "add_transaction"
+SERVICE_UPDATE_TRANSACTION = "update_transaction"
 SERVICE_DELETE_TRANSACTION = "delete_transaction"
 SERVICE_CREATE_BOOK = "create_book"
 SERVICE_DELETE_BOOK = "delete_book"
