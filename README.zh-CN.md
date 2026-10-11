@@ -2,9 +2,11 @@
 
 [English](README.md) | [繁體中文](README.zh-TW.md)
 
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+
 Home Assistant 自定义集成，提供侧边栏记账面板、收支统计、分类预算、固定支出与数据导入导出功能。数据储存在 Home Assistant storage 中，会随 HA 备份一起保存。
 
-当前版本：`v1.1.2`
+当前版本：`v1.1.3`
 
 ## 软件截图
 
@@ -56,6 +58,8 @@ Home Assistant 自定义集成，提供侧边栏记账面板、收支统计、�
 ## 安装教程
 
 ### HACS 自定义存储库
+
+[![打开 Home Assistant，并在 HACS 中打开此存储库](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Im-Tim-mI&repository=Home-Assistant_Budget-Book&category=integration)
 
 1. 在 Home Assistant 中打开 HACS。
 2. 点击右上角三点菜单，选择 `Custom repositories`。

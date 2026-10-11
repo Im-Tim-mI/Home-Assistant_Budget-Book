@@ -2,9 +2,11 @@
 
 [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md)
 
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+
 A Home Assistant custom integration that adds a sidebar budgeting panel with transaction tracking, income and expense summaries, category budgets, recurring expenses, and JSON import/export. Data is stored in Home Assistant storage, so it is included with your regular HA backups.
 
-Current release: `v1.1.2`
+Current release: `v1.1.3`
 
 ## Screenshots
 
@@ -56,6 +58,8 @@ Budget Book reads state from the parent Home Assistant frontend. Since Home Assi
 ## Installation
 
 ### HACS Custom Repository
+
+[![Open your Home Assistant instance and open this repository inside HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Im-Tim-mI&repository=Home-Assistant_Budget-Book&category=integration)
 
 1. Open HACS in Home Assistant.
 2. Open the three-dot menu in the top right and choose `Custom repositories`.
