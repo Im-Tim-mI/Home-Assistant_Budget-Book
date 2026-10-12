@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1
+
+- Sync the Supervisor Add-on version with the HACS integration version.
+- Align the add-on sidebar icon/title with the integration sidebar entry.
+- Sync the Home Assistant sidebar entry title with Budget Book's Auto/English/繁中/简中 language mode while the panel is open.
+
 ## 0.3.0
 
 - Move the add-on into the main `Home-Assistant_Budget-Book` repository so the same repo supports HACS integration and Supervisor Add-on installation.

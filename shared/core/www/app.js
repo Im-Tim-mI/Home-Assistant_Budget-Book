@@ -7,6 +7,12 @@ const fmt = (n) => n == null ? '—' : Math.round(n).toLocaleString(currentLangu
 const fmtSigned = (n) => n == null ? '—' : (n >= 0 ? '+' : '') + Math.round(n).toLocaleString(currentLanguage);
 const SUPPORTED_LANGS = ['en', 'zh-Hant', 'zh-Hans'];
 const LOCALE_STORAGE_KEY = 'budgetBookLanguage';
+const SIDEBAR_TITLE_BY_LANG = {
+  en: 'Budget Book',
+  'zh-Hant': '記帳本',
+  'zh-Hans': '记账本',
+};
+const SIDEBAR_ICON = 'mdi:notebook';
 
 function log(...args) {
   console.log('[BudgetBook]', ...args);
@@ -61,6 +67,57 @@ function tr(key, vars = {}) {
   return t(key, vars);
 }
 
+function findDeep(root, predicate, matches = []) {
+  if (!root) return matches;
+  const children = root.children ? Array.from(root.children) : [];
+  for (const child of children) {
+    if (predicate(child)) matches.push(child);
+    if (child.shadowRoot) findDeep(child.shadowRoot, predicate, matches);
+    findDeep(child, predicate, matches);
+  }
+  return matches;
+}
+
+function syncParentSidebar() {
+  const title = SIDEBAR_TITLE_BY_LANG[currentLanguage] || SIDEBAR_TITLE_BY_LANG.en;
+  try {
+    const panels = parentHass?.panels || {};
+    Object.entries(panels).forEach(([path, panel]) => {
+      const key = String(path || panel?.url_path || '').toLowerCase();
+      if (key.includes('budget_book')) {
+        panel.title = title;
+        panel.icon = SIDEBAR_ICON;
+      }
+    });
+  } catch (e) {}
+
+  try {
+    const parentDoc = window.parent?.document;
+    if (!parentDoc || parentDoc === document) return;
+
+    const knownTitles = Object.values(SIDEBAR_TITLE_BY_LANG);
+    const buttons = findDeep(parentDoc, (el) => {
+      const id = String(el.id || '');
+      const href = String(el.getAttribute?.('href') || el.href || '').toLowerCase();
+      const label = (el.textContent || '').trim();
+      return (
+        id.startsWith('sidebar-panel-') &&
+        (href.includes('budget_book') || knownTitles.includes(label))
+      );
+    });
+
+    buttons.forEach((button) => {
+      const label = findDeep(button, (el) => (
+        el.classList?.contains('item-text') || el.getAttribute?.('slot') === 'headline'
+      ))[0];
+      if (label) label.textContent = title;
+
+      const icon = findDeep(button, (el) => el.tagName?.toLowerCase() === 'ha-icon')[0];
+      if (icon) icon.setAttribute('icon', SIDEBAR_ICON);
+    });
+  } catch (e) {}
+}
+
 function setText(id, key) {
   const el = $(id);
   if (el) el.textContent = t(key);
@@ -70,6 +127,7 @@ function translateDocument() {
   messages = allMessages[currentLanguage] || allMessages.en || {};
   document.documentElement.lang = currentLanguage;
   document.title = t('app.title');
+  syncParentSidebar();
   document.querySelectorAll('[data-i18n]').forEach((el) => {
     el.textContent = t(el.dataset.i18n);
   });

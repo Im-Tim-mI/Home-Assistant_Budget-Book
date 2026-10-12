@@ -11,7 +11,7 @@ Budget Book is a Home Assistant budgeting app that now supports both **HACS cust
 - **Supervisor Add-on:** runs the same Budget Book interface through ingress, stores data in `/data/budget_book.json`, and provides its own add-on API.
 - **Shared core:** frontend UI, language files, analytics, data shape, import/export behavior, sample data, and migration logic are kept in `shared/core/` and synced into both adapters.
 
-Current versions: HACS integration `v1.2.0`, Supervisor Add-on `v0.3.0`.
+Current version: HACS integration and Supervisor Add-on `v1.2.1`.
 
 ## Screenshots
 

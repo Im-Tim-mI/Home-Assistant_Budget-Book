@@ -94,6 +94,37 @@ const root = path.resolve(__dirname, '..');
     await page.reload();
     await page.locator('#main').waitFor({ state: 'visible' });
 
+    const shell = await browser.newPage({ viewport: { width: 1000, height: 800 }, locale: 'zh-CN' });
+    try {
+      await shell.goto(base);
+      await shell.setContent(`
+        <home-assistant></home-assistant>
+        <a id="sidebar-panel-budget_book" href="/budget_book">
+          <ha-icon slot="start" icon="mdi:book-open-variant"></ha-icon>
+          <span class="item-text" slot="headline">Budget Book</span>
+        </a>
+        <iframe id="budget-frame" src="${base}" style="width:800px;height:600px"></iframe>
+        <script>
+          document.querySelector('home-assistant').hass = {
+            locale: { language: 'zh-CN' },
+            panels: { budget_book: { url_path: 'budget_book', title: 'Budget Book', icon: 'mdi:book-open-variant' } }
+          };
+        </script>
+      `);
+      const frameElement = await shell.waitForSelector('#budget-frame');
+      const frame = await frameElement.contentFrame();
+      await frame.locator('#main').waitFor({ state: 'visible' });
+      await shell.locator('#sidebar-panel-budget_book .item-text').waitFor({ hasText: '记账本' });
+      assert.equal(await shell.locator('#sidebar-panel-budget_book ha-icon').getAttribute('icon'), 'mdi:notebook');
+      await shell.evaluate(() => {
+        document.querySelector('home-assistant').hass.locale.language = 'zh-TW';
+      });
+      await shell.locator('#sidebar-panel-budget_book .item-text').waitFor({ hasText: '記帳本', timeout: 5000 });
+      console.log('PASS: parent Home Assistant sidebar title/icon follows Auto language.');
+    } finally {
+      await shell.close();
+    }
+
     for (const lang of ['en', 'zh-Hant', 'zh-Hans']) {
       await tab('settings');
       await page.locator('#language-select').selectOption(lang);

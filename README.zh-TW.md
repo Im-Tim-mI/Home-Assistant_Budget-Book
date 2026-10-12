@@ -11,7 +11,7 @@
 - **Supervisor Add-on：** 使用同一套記帳本介面，透過 ingress 開啟，資料存在 `/data/budget_book.json`，並提供 add-on API。
 - **共用核心：** 前端 UI、語言檔、分析邏輯、資料格式、匯入匯出、範例資料與 migration 放在 `shared/core/`，再同步到兩個 adapter。
 
-目前版本：HACS integration `v1.2.0`，Supervisor Add-on `v0.3.0`。
+目前版本：HACS integration 與 Supervisor Add-on 皆為 `v1.2.1`。
 
 ## 截圖
 
