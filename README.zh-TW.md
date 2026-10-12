@@ -11,7 +11,7 @@
 - **HACS integration：** 保留原本 Home Assistant entity、sensor、service、側邊欄面板與 HA storage 行為。
 - **共用核心：** 前端 UI、語言檔、分析邏輯、資料格式、匯入匯出、範例資料與 migration 放在 `shared/core/`，再同步到兩個 adapter。
 
-目前版本：Supervisor Add-on 與 HACS integration 皆為 `v1.2.2`。
+目前版本：Supervisor Add-on 與 HACS integration 皆為 `v1.2.3`。
 
 ## 截圖
 

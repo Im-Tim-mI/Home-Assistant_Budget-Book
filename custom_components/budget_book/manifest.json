@@ -1,7 +1,7 @@
 {
   "domain": "budget_book",
   "name": "Home-Assistant 記帳本 (Budget Book)",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "documentation": "https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book",
   "issue_tracker": "https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book/issues",
   "dependencies": ["http", "frontend"],

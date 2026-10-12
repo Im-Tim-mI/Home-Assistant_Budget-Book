@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.3
+
+- Add root-level HACS brand assets (`brand/icon.png`, `brand/icon@2x.png`, `brand/icon.svg`) so the HACS repository list can show the Budget Book icon.
+
 ## 1.2.2
 
 - Allow the HACS integration and Supervisor Add-on to be installed together with shared data.
