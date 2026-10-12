@@ -11,7 +11,7 @@ Budget Book is a Home Assistant budgeting app that now supports both **Superviso
 - **HACS integration:** keeps the original Home Assistant entity, sensor, service, sidebar panel, and HA storage behavior.
 - **Shared core:** frontend UI, language files, analytics, data shape, import/export behavior, sample data, and migration logic are kept in `shared/core/` and synced into both adapters.
 
-Current version: Supervisor Add-on and HACS integration `v1.2.1`.
+Current version: Supervisor Add-on and HACS integration `v1.2.2`.
 
 ## Screenshots
 
@@ -91,11 +91,11 @@ Then restart Home Assistant and add the integration from Settings -> Devices & s
 
 ## Which Install Should I Use?
 
-Use **Supervisor Add-on** if you prefer an add-on app with ingress, Docker isolation, and `/data` persistence.
+Use **Supervisor Add-on** if you prefer an add-on app with ingress and Docker isolation.
 
 Use **HACS integration** if you want the original behavior: registered HA services, Home Assistant storage, and normal custom integration entities.
 
-Do not run both against the same Home Assistant instance unless you intentionally keep their data separate. The integration owns its HA entities and services; the add-on publishes compatibility `sensor.budget_book_*` states through the Home Assistant API.
+You can install both on the same Home Assistant instance. When both are present, the HACS integration's HA storage becomes the shared source of truth. On startup, the add-on migrates existing `/data/budget_book.json` data into the integration if the integration is still empty; if the integration already has data, the add-on adopts that data and keeps a timestamped local backup before replacing its own copy. After add-on changes, it syncs back through `budget_book.replace_data`.
 
 ## Repository Structure
 

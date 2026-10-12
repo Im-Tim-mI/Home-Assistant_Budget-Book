@@ -132,6 +132,69 @@ class AddonTests(unittest.TestCase):
         self.assertNotIn('full_data', states['sensor.budget_book_all_books'][1])
         json.dumps(states)
 
+    def test_startup_sync_pushes_existing_addon_data_to_empty_integration(self):
+        integration_data = copy.deepcopy(server.STORE.data)
+        self.call('add_transaction', date=date.today().isoformat(), type='expense', amount=200, category='food')
+        pushed = []
+
+        original_fetch = server.fetch_integration_data
+        original_push = server.push_data_to_integration
+        try:
+            server.fetch_integration_data = lambda: integration_data
+            server.push_data_to_integration = lambda data=None: pushed.append(copy.deepcopy(data or server.STORE.data)) or True
+            asyncio.run(server.sync_with_integration_on_start())
+        finally:
+            server.fetch_integration_data = original_fetch
+            server.push_data_to_integration = original_push
+
+        self.assertEqual(pushed[0], server.STORE.data)
+        self.assertEqual(server.STORE.active_book['transactions'][0]['amount'], 200)
+
+    def test_startup_sync_uses_integration_data_and_preserves_addon_backup_on_conflict(self):
+        self.call('add_transaction', date=date.today().isoformat(), type='expense', amount=200, category='food')
+        addon_before = copy.deepcopy(server.STORE.data)
+        self.call('load_sample')
+        integration_data = copy.deepcopy(server.STORE.data)
+        server.STORE = BudgetStore(self.path)
+        asyncio.run(server.STORE.async_load())
+        asyncio.run(server.STORE.async_replace_data(addon_before))
+
+        original_fetch = server.fetch_integration_data
+        try:
+            server.fetch_integration_data = lambda: integration_data
+            asyncio.run(server.sync_with_integration_on_start())
+        finally:
+            server.fetch_integration_data = original_fetch
+
+        self.assertEqual(server.STORE.data, integration_data)
+        backups = list(Path(self.path).parent.glob('ledger.json.pre-ha-sync-*'))
+        self.assertTrue(backups)
+        self.assertEqual(json.loads(backups[0].read_text()), addon_before)
+
+    def test_refresh_pulls_direct_integration_changes_while_addon_is_running(self):
+        integration_data = copy.deepcopy(server.STORE.data)
+        book_id = integration_data['active_book_id']
+        integration_data['books'][book_id]['transactions'].append({
+            'id': 'haedit',
+            'date': date.today().isoformat(),
+            'time': None,
+            'type': 'expense',
+            'amount': 88,
+            'category': 'food',
+            'note': 'edited in integration',
+            'recurring_id': None,
+        })
+
+        original_fetch = server.fetch_integration_data
+        try:
+            server.fetch_integration_data = lambda: integration_data
+            changed = asyncio.run(server.refresh_from_integration_source())
+        finally:
+            server.fetch_integration_data = original_fetch
+
+        self.assertTrue(changed)
+        self.assertEqual(server.STORE.active_book['transactions'][0]['id'], 'haedit')
+
 
 if __name__ == '__main__':
     unittest.main()

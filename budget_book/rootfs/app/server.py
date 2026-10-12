@@ -8,6 +8,7 @@ import logging
 import math
 import os
 import re
+import shutil
 import threading
 import urllib.request
 import uuid
@@ -26,6 +27,9 @@ PORT = int(os.environ.get('BUDGET_BOOK_PORT', '8099'))
 WEB_ROOT = Path(os.environ.get('BUDGET_BOOK_WEB_ROOT', str(Path(__file__).parent / 'www')))
 LOCK = threading.RLock()
 STORE = BudgetStore(os.environ.get('BUDGET_BOOK_DATA', '/data/budget_book.json'))
+HA_API_BASE = os.environ.get('BUDGET_BOOK_HA_API', 'http://supervisor/core/api').rstrip('/')
+HA_SYNC_ENABLED = os.environ.get('BUDGET_BOOK_HA_SYNC', 'true').lower() not in ('0', 'false', 'no')
+HA_SHARED_MODE = False
 
 
 async def run_recurring():
@@ -44,6 +48,7 @@ async def run_recurring():
             changed = True
     if changed:
         await STORE.async_replace_data(data)
+        push_data_to_integration(STORE.data)
 
 
 def snapshot():
@@ -66,6 +71,126 @@ SENSORS = [
     ('over_budget_count', '預算超支類別數', '個', 'mdi:alert', 'measurement'),
 ]
 SENSOR_DIRTY = threading.Event()
+
+
+def _json_stable(data):
+    return json.dumps(data, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+
+
+def has_user_data(data):
+    """Return true when a ledger looks user-owned rather than first-run empty."""
+    if not isinstance(data, dict) or not isinstance(data.get('books'), dict):
+        return False
+    books = data['books']
+    if len(books) > 1:
+        return True
+    for book in books.values():
+        if book.get('transactions') or book.get('recurring') or book.get('budgets'):
+            return True
+        default_category_ids = {
+            'salary', 'bonus', 'investment', 'side', 'income_other',
+            'food', 'transport', 'shopping', 'entertainment', 'household',
+            'medical', 'education', 'subscription', 'rent', 'utility', 'other',
+        }
+        category_ids = {c.get('id') for c in book.get('categories', []) if isinstance(c, dict)}
+        if category_ids - default_category_ids:
+            return True
+    return False
+
+
+def backup_local_data(reason):
+    """Keep a timestamped local copy before replacing add-on data from HA."""
+    path = getattr(getattr(STORE, '_store', None), 'path', None)
+    if not path or not Path(path).exists():
+        return None
+    stamp = datetime.now().strftime('%Y%m%d-%H%M%S')
+    backup = Path(f'{path}.pre-{reason}-{stamp}')
+    shutil.copy2(path, backup)
+    return backup
+
+
+def ha_api(path, method='GET', data=None):
+    token = os.environ.get('SUPERVISOR_TOKEN')
+    if not token:
+        raise RuntimeError('SUPERVISOR_TOKEN is not available')
+    body = None if data is None else json.dumps(data, ensure_ascii=False).encode()
+    request = urllib.request.Request(
+        f'{HA_API_BASE}/{path.lstrip("/")}', data=body, method=method,
+        headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'})
+    with urllib.request.urlopen(request, timeout=10) as response:
+        payload = response.read()
+    return json.loads(payload.decode() or '{}')
+
+
+def fetch_integration_data():
+    if not HA_SYNC_ENABLED:
+        return None
+    try:
+        state = ha_api('states/sensor.budget_book_all_books')
+        full_data = state.get('attributes', {}).get('full_data')
+        if not full_data:
+            return None
+        return normalize_data(full_data)
+    except Exception as error:
+        logging.debug('Budget Book integration data unavailable: %s', error)
+        return None
+
+
+def push_data_to_integration(data=None):
+    if not HA_SYNC_ENABLED:
+        return False
+    payload = data if data is not None else STORE.data
+    try:
+        ha_api('services/budget_book/replace_data', method='POST', data={'data': payload})
+        logging.info('Synchronized Budget Book add-on data to the HACS integration')
+        return True
+    except Exception as error:
+        logging.warning('Synchronizing Budget Book data to the HACS integration failed: %s', error)
+        return False
+
+
+async def sync_with_integration_on_start():
+    """Share data with the HACS integration when both install targets exist."""
+    global HA_SHARED_MODE
+    integration_data = fetch_integration_data()
+    if integration_data is None:
+        return
+    HA_SHARED_MODE = True
+
+    local_data = STORE.data
+    if _json_stable(local_data) == _json_stable(integration_data):
+        logging.info('Budget Book add-on and HACS integration data are already synchronized')
+        return
+
+    local_has_data = has_user_data(local_data)
+    integration_has_data = has_user_data(integration_data)
+    if local_has_data and not integration_has_data:
+        logging.info('Migrating existing add-on data into the HACS integration')
+        push_data_to_integration(local_data)
+        return
+
+    backup = backup_local_data('ha-sync')
+    if backup:
+        logging.info('Backed up add-on data before HA sync: %s', backup)
+    if local_has_data and integration_has_data:
+        logging.warning(
+            'Both Budget Book install targets contain data; using HACS integration data '
+            'as the shared source and keeping the add-on copy as a backup')
+    await STORE.async_replace_data(integration_data)
+
+
+async def refresh_from_integration_source():
+    """Keep the add-on view current when the integration is edited directly."""
+    global HA_SHARED_MODE
+    integration_data = fetch_integration_data()
+    if integration_data is None:
+        return False
+    HA_SHARED_MODE = True
+    if _json_stable(STORE.data) == _json_stable(integration_data):
+        return False
+    await STORE.async_replace_data(integration_data)
+    SENSOR_DIRTY.set()
+    return True
 
 
 def ha_sensor_states():
@@ -105,6 +230,9 @@ def ha_sensor_states():
 def publish_sensors():
     token = os.environ.get('SUPERVISOR_TOKEN')
     if not token:
+        return
+    if fetch_integration_data() is not None:
+        logging.debug('HACS integration owns Budget Book sensors; skipping add-on sensor publish')
         return
     with LOCK:
         states = ha_sensor_states()
@@ -207,6 +335,8 @@ class Handler(SimpleHTTPRequestHandler):
         path = urlparse(self.path).path
         if path in ('/api/states', '/api/data', '/api/export', '/api/health'):
             with LOCK:
+                if path != '/api/health':
+                    asyncio.run(refresh_from_integration_source())
                 result = {'status': 'ok'} if path == '/api/health' else snapshot() if path == '/api/states' else STORE.data
                 self.send_json(200, result)
             return
@@ -234,6 +364,7 @@ class Handler(SimpleHTTPRequestHandler):
                 except Exception:
                     STORE._data = before
                     raise
+                push_data_to_integration(STORE.data)
                 SENSOR_DIRTY.set()
                 self.send_json(200, snapshot())
         except (ValueError, TypeError, KeyError, AttributeError, OverflowError) as error:
@@ -263,6 +394,8 @@ if __name__ == '__main__':
     level = {'TRACE': 'DEBUG', 'NOTICE': 'INFO', 'FATAL': 'CRITICAL'}.get(level, level)
     logging.basicConfig(level=getattr(logging, level, logging.INFO))
     asyncio.run(STORE.async_load())
+    with LOCK:
+        asyncio.run(sync_with_integration_on_start())
     asyncio.run(run_recurring())
     stop = threading.Event()
     threading.Thread(target=recurring_scheduler, args=(stop,), daemon=True).start()

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.2
+
+- Allow the HACS integration and Supervisor Add-on to be installed together with shared data.
+- Use the HACS integration's HA storage as the shared source of truth when both install targets are present.
+- Automatically migrate existing add-on `/data/budget_book.json` data into the integration when the integration is empty.
+- Preserve timestamped local add-on backups before adopting integration data, and keep old-format migration backups.
+- Avoid overwriting integration-owned `sensor.budget_book_*` states when the integration is installed.
+
 ## 1.2.1
 
 - Sync the Supervisor Add-on version with the HACS integration version.

@@ -2,11 +2,11 @@
 
 ## Opening the App
 
-After installing and starting the add-on, open Budget Book from the Home Assistant sidebar or from the add-on page. The UI is the same panel as the Budget Book custom integration v1.2.1.
+After installing and starting the add-on, open Budget Book from the Home Assistant sidebar or from the add-on page. The UI is the same panel as the Budget Book custom integration v1.2.2.
 
 ## Data Storage
 
-Budget data is stored at:
+When only the add-on is installed, budget data is stored at:
 
 ```text
 /data/budget_book.json
@@ -14,12 +14,13 @@ Budget data is stored at:
 
 This file is inside the add-on persistent data volume and is included in Home Assistant backups.
 
+When the HACS integration is also installed, the integration's HA storage is the shared source of truth. On startup, the add-on migrates existing `/data/budget_book.json` data into the integration if the integration is empty. If both sides already contain user data, the add-on adopts the integration data and keeps a timestamped local copy before replacing its own file.
+
 Data saved by add-on 0.1.0 is converted automatically on first start; the original file is kept as `/data/budget_book.json.pre-migration`.
 
 ### Moving data from the custom integration
 
-1. In the integration panel, open Settings and use Export JSON.
-2. In the add-on panel, open Settings and use Import JSON with that file.
+Install and start both targets on the same Home Assistant instance. The add-on will read `sensor.budget_book_all_books` from the integration and synchronize future add-on changes back through `budget_book.replace_data`.
 
 ## Sensors
 
@@ -54,6 +55,6 @@ If `/data/budget_book.json` cannot be read, the add-on refuses to start rather t
 
 ## Differences from the Integration
 
-- `budget_book.*` Home Assistant services are not available; use the panel.
-- Do not run the custom integration and this add-on at the same time: both write `sensor.budget_book_*`.
+- If the HACS integration is installed, it owns the official `budget_book.*` Home Assistant services and sensors.
+- If the HACS integration is not installed, the add-on publishes compatibility `sensor.budget_book_*` states through the Home Assistant API.
 - Shared UI, language, analytics, data shape, import/export, sample data and migration code are maintained from the repository `shared/core/` directory.

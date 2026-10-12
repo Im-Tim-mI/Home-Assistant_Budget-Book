@@ -46,7 +46,9 @@ Schema:
 """
 from __future__ import annotations
 
+import copy
 import logging
+import math
 import uuid
 from datetime import datetime
 from typing import Any
@@ -61,6 +63,73 @@ from const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def normalize_budget_data(value: Any) -> tuple[dict[str, Any] | None, bool]:
+    """Normalize old Budget Book payloads into the current shared schema."""
+    if not isinstance(value, dict):
+        return None, False
+
+    original = copy.deepcopy(value)
+    data = copy.deepcopy(value)
+    if "books" not in data and isinstance(data.get("data"), dict):
+        data = data["data"]
+
+    books = data.get("books")
+    if isinstance(books, list):
+        converted = {}
+        for old in books:
+            if not isinstance(old, dict):
+                continue
+            book = make_default_book(old.get("name", "Budget Book"), old.get("currency", "TWD"))
+            book.update(old)
+            categories = old.get("categories", {})
+            if isinstance(categories, dict):
+                book["categories"] = [
+                    {
+                        "id": name,
+                        "name": name,
+                        "type": kind,
+                        "icon": "mdi:tag",
+                        "color": "#95A5A6",
+                    }
+                    for kind, names in categories.items()
+                    if kind in ("income", "expense") and isinstance(names, list)
+                    for name in names
+                ]
+            converted[book["id"]] = book
+        data["books"] = books = converted
+
+    if not isinstance(books, dict):
+        return None, False
+
+    for bid, book in books.items():
+        if not isinstance(book, dict) or book.get("id") != bid:
+            return None, False
+        book.setdefault("name", "Budget Book")
+        book.setdefault("currency", "TWD")
+        book.setdefault("created_at", _now_iso())
+        for key in ("transactions", "categories", "recurring"):
+            book.setdefault(key, [])
+            if not isinstance(book[key], list):
+                return None, False
+        book.setdefault("budgets", {})
+        if not isinstance(book["budgets"], dict):
+            return None, False
+        for amount in book["budgets"].values():
+            if not isinstance(amount, (int, float)) or not math.isfinite(amount) or amount < 0:
+                return None, False
+        for item in [*book["transactions"], *book["recurring"]]:
+            amount = item.get("amount") if isinstance(item, dict) else None
+            if amount is not None and (
+                not isinstance(amount, (int, float)) or not math.isfinite(amount) or amount < 0
+            ):
+                return None, False
+
+    if data.get("active_book_id") not in books:
+        data["active_book_id"] = next(iter(books), None)
+
+    return data, data != original
 
 
 def _now_iso() -> str:
@@ -98,12 +167,18 @@ class BudgetStore:
 
     def __init__(self, path: str) -> None:
         self._store = Store(path)
+        self._backup_store = None
         self._data: dict[str, Any] = {"books": {}, "active_book_id": None}
 
     async def async_load(self) -> None:
-        data = await self._store.async_load()
-        if data and isinstance(data, dict) and "books" in data:
+        raw = await self._store.async_load()
+        data, migrated = normalize_budget_data(raw)
+        if data is not None and "books" in data:
             self._data = data
+            if migrated:
+                if self._backup_store is not None:
+                    await self._backup_store.async_save(raw)
+                await self.async_save()
         else:
             self._data = {"books": {}, "active_book_id": None}
 
@@ -413,9 +488,10 @@ class BudgetStore:
 
     async def async_replace_data(self, data: dict[str, Any]) -> None:
         """Replace entire data (for import)."""
-        if "books" not in data:
+        normalized, _migrated = normalize_budget_data(data)
+        if normalized is None or "books" not in normalized:
             raise ValueError("Invalid data: missing 'books'")
-        self._data = data
+        self._data = normalized
         if (
             self._data.get("active_book_id") not in self._data["books"]
             and self._data["books"]

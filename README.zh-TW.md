@@ -11,7 +11,7 @@
 - **HACS integration：** 保留原本 Home Assistant entity、sensor、service、側邊欄面板與 HA storage 行為。
 - **共用核心：** 前端 UI、語言檔、分析邏輯、資料格式、匯入匯出、範例資料與 migration 放在 `shared/core/`，再同步到兩個 adapter。
 
-目前版本：Supervisor Add-on 與 HACS integration 皆為 `v1.2.1`。
+目前版本：Supervisor Add-on 與 HACS integration 皆為 `v1.2.2`。
 
 ## 截圖
 
@@ -91,11 +91,11 @@ cp -R custom_components/budget_book /config/custom_components/budget_book
 
 ## 該用哪一種？
 
-如果你想用 add-on app、ingress、Docker 隔離與 `/data` 儲存，請用 **Supervisor Add-on**。
+如果你想用 add-on app、ingress 與 Docker 隔離，請用 **Supervisor Add-on**。
 
 如果你要原本的 Home Assistant 行為，例如正式註冊的 `budget_book.*` service、HA storage、entity 與 sensor，請用 **HACS integration**。
 
-不要在同一個 Home Assistant 內同時啟用兩者，除非你刻意讓資料分開。Integration 擁有正式 entity 與 service；Add-on 會透過 Home Assistant API 發佈相容的 `sensor.budget_book_*` 狀態。
+可以在同一個 Home Assistant 內同時安裝兩者。當兩者都存在時，HACS integration 的 HA storage 會作為共通資料來源。Add-on 啟動時如果 integration 還是空的，會把既有 `/data/budget_book.json` 自動遷移進 integration；如果 integration 已經有資料，Add-on 會改用 integration 的資料，並在覆蓋自己的本地資料前保留時間戳備份。之後 Add-on 端的變更會透過 `budget_book.replace_data` 同步回 integration。
 
 ## Repository 結構
 
