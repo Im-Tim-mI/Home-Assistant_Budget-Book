@@ -3,57 +3,45 @@
 [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md)
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+[![Supervisor Add-on](docs/badges/supervisor-addon.svg)](https://developers.home-assistant.io/docs/add-ons/)
 
-A Home Assistant custom integration that adds a sidebar budgeting panel with transaction tracking, income and expense summaries, category budgets, recurring expenses, and JSON import/export. Data is stored in Home Assistant storage, so it is included with your regular HA backups.
+Budget Book is a Home Assistant budgeting app that now supports both **HACS custom integration** and **Supervisor Add-on** installation from this same repository.
 
-Current release: `v1.1.4`
+- **HACS integration:** keeps the original Home Assistant entity, sensor, service, sidebar panel, and HA storage behavior.
+- **Supervisor Add-on:** runs the same Budget Book interface through ingress, stores data in `/data/budget_book.json`, and provides its own add-on API.
+- **Shared core:** frontend UI, language files, analytics, data shape, import/export behavior, sample data, and migration logic are kept in `shared/core/` and synced into both adapters.
+
+Current versions: HACS integration `v1.2.0`, Supervisor Add-on `v0.3.0`.
 
 ## Screenshots
 
-### Desktop
+### HACS Integration
 
-| Overview | English UI |
+| Overview | Transactions |
 | --- | --- |
-| ![Overview screen](docs/images/screenshot-overview.png) | ![English overview screen](docs/images/screenshot-overview-en.png) |
-
-| Transactions | Language settings |
-| --- | --- |
-| ![Transactions screen](docs/images/screenshot-transactions.png) | ![Language settings screen](docs/images/screenshot-settings-language.png) |
+| ![Overview screen](docs/images/screenshot-overview-en.png) | ![Transactions screen](docs/images/screenshot-transactions.png) |
 
 | Charts | Budgets |
 | --- | --- |
 | ![Charts screen](docs/images/screenshot-charts.png) | ![Budgets screen](docs/images/screenshot-budgets.png) |
 
-### Mobile
+### Supervisor Add-on
 
-![Mobile overview screen](docs/images/screenshot-mobile-overview-en.png)
+| Desktop | Mobile |
+| --- | --- |
+| ![Add-on desktop screen](docs/images/addon-en-home.png) | <img src="docs/images/addon-en-mobile.png" alt="Add-on mobile screen" width="260"> |
 
 ## Features
 
-- Manage multiple budget books for household, personal, or project expenses.
-- Record income and expenses with categories, notes, dates, and times.
-- Track monthly expenses, monthly income, monthly balance, and total balance.
-- View category spending, six-month trends, and budget usage charts.
-- Set monthly category budgets with 80% warning and over-budget alerts.
-- Configure recurring monthly entries that are checked automatically every day at 09:00.
-- Import, export, and load sample data as JSON.
-- Built-in interface languages: English, Traditional Chinese, and Simplified Chinese.
-- Auto language mode follows the Home Assistant language, with an optional manual override in Budget Book settings.
-- Frontend state refreshes after service calls, so newly added, edited, imported, or deleted entries appear without reloading the Home Assistant page.
-
-## Languages
-
-Budget Book stores frontend language files in `www/locales/`:
-
-- `en.json`
-- `zh-Hant.json`
-- `zh-Hans.json`
-
-To add another language later, add a new JSON file with the same keys, then register the language in `www/app.js`.
-
-## State Refresh
-
-Budget Book reads state from the parent Home Assistant frontend. Since Home Assistant can replace the `hass` object when new states arrive, the panel refreshes the current `hass` reference before polling and schedules short follow-up refreshes after service calls. This avoids stale screens after adding entries, deleting entries, importing data, or changing books.
+- Multiple budget books for household, personal, or project expenses.
+- Income and expense records with category, note, date, and time.
+- Monthly expense, monthly income, monthly balance, and total balance summaries.
+- Category spending, six-month trend, and budget usage charts.
+- Monthly category budgets with 80% warnings and over-budget alerts.
+- Recurring monthly entries checked automatically every day at 09:00.
+- JSON import/export, sample data, and clear-book tools.
+- Built-in English, Traditional Chinese, and Simplified Chinese UI.
+- Auto language mode follows Home Assistant language, with manual override in Budget Book settings.
 
 ## Installation
 
@@ -62,66 +50,74 @@ Budget Book reads state from the parent Home Assistant frontend. Since Home Assi
 [![Open your Home Assistant instance and open this repository inside HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Im-Tim-mI&repository=Home-Assistant_Budget-Book&category=integration)
 
 1. Open HACS in Home Assistant.
-2. Open the three-dot menu in the top right and choose `Custom repositories`.
+2. Open the three-dot menu and choose `Custom repositories`.
 3. Add this repository URL:
 
    ```text
    https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book
    ```
 
-4. Select `Integration` as the category, then click `ADD`.
-5. Install `Home-Assistant 記帳本 (Budget Book)` from HACS.
+4. Select category `Integration`.
+5. Install `Home-Assistant 記帳本 (Budget Book)`.
 6. Restart Home Assistant.
-7. Go to Settings -> Devices & services -> Add integration, then search for "Home-Assistant 記帳本", "Budget Book", or "記帳本" and add it.
+7. Go to Settings -> Devices & services -> Add integration, then search for `Budget Book` or `記帳本`.
 
-### Release ZIP
+### Supervisor Add-on Store Repository
 
-Download the latest release ZIP from:
+[![Open your Home Assistant instance and add this add-on repository](docs/badges/add-repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FIm-Tim-mI%2FHome-Assistant_Budget-Book)
 
-<https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book/releases/latest>
+1. Open Home Assistant.
+2. Go to Settings -> Add-ons -> Add-on Store.
+3. Open the top-right menu and choose `Repositories`.
+4. Add this repository URL:
 
-Extract it and copy the `budget_book` folder to:
-
-```bash
-/config/custom_components/budget_book
-```
-
-Restart Home Assistant after copying the files.
-
-### Manual Installation
-
-1. Create the integration directory in your Home Assistant config folder:
-
-   ```bash
-   mkdir -p /config/custom_components/budget_book
+   ```text
+   https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book
    ```
 
-2. Copy this project into that directory. If Git is available on your Home Assistant host, you can clone it directly:
+5. Install `Budget Book`.
+6. Start the add-on and open it from the sidebar or add-on page.
 
-   ```bash
-   git clone https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book.git /config/custom_components/budget_book
-   ```
+### Manual HACS Integration Install
 
-3. Restart Home Assistant.
-
-4. Go to Settings -> Devices & services -> Add integration, then search for "Home-Assistant 記帳本", "Budget Book", or "記帳本" and add it.
-
-5. After the integration is added, "記帳本" will appear in the Home Assistant sidebar. Open it to start adding transactions or load the sample data first.
-
-### Updating
-
-If you installed with Git:
+Copy only the integration folder to Home Assistant:
 
 ```bash
-cd /config/custom_components/budget_book
-git pull
+mkdir -p /config/custom_components
+cp -R custom_components/budget_book /config/custom_components/budget_book
 ```
 
-If you installed from a ZIP file, download the latest release ZIP again and replace the existing `budget_book` folder. Restart Home Assistant after updating. If the old panel is still visible, clear the browser/app WebView cache or reload Home Assistant once.
+Then restart Home Assistant and add the integration from Settings -> Devices & services.
 
-## Services
+## Which Install Should I Use?
 
-The integration provides services under the `budget_book` domain. They can be called from automations or Developer Tools, for example:
+Use **HACS integration** if you want the original behavior: registered HA services, Home Assistant storage, and normal custom integration entities.
+
+Use **Supervisor Add-on** if you prefer an add-on app with ingress, Docker isolation, and `/data` persistence.
+
+Do not run both against the same Home Assistant instance unless you intentionally keep their data separate. The integration owns its HA entities and services; the add-on publishes compatibility `sensor.budget_book_*` states through the Home Assistant API.
+
+## Repository Structure
+
+```text
+.
+├── custom_components/budget_book/   # HACS integration
+├── budget_book/                     # Supervisor Add-on
+├── shared/core/                     # shared source for UI/data/analytics/migration
+├── scripts/sync_shared_core.py      # syncs shared core into both adapters
+├── hacs.json
+└── repository.yaml
+```
+
+When changing shared behavior, edit `shared/core/` first, then run:
+
+```bash
+python3 scripts/sync_shared_core.py
+```
+
+## HACS Services
+
+The integration provides `budget_book.*` services for automations and Developer Tools:
 
 - `budget_book.add_transaction`
 - `budget_book.delete_transaction`
@@ -132,8 +128,17 @@ The integration provides services under the `budget_book` domain. They can be ca
 - `budget_book.run_recurring`
 - `budget_book.replace_data`
 
-See `services.yaml` for the full field definitions.
+See `custom_components/budget_book/services.yaml` for full field definitions.
+
+## Development Checks
+
+```bash
+python3 scripts/sync_shared_core.py
+python3 -m py_compile custom_components/budget_book/*.py budget_book/rootfs/app/*.py
+ruby -e 'require "yaml"; YAML.load_file("repository.yaml"); YAML.load_file("budget_book/config.yaml")'
+python3 -m unittest tests/test_addon.py
+```
 
 ## License
 
-This project is licensed under the MIT License.
+MIT

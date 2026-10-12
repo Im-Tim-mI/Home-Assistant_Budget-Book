@@ -1,0 +1,24 @@
+name: Budget Book
+version: "0.3.0"
+slug: budget_book
+description: Original Budget Book interface and features, packaged as a Supervisor add-on.
+url: https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book
+arch:
+  - aarch64
+  - amd64
+startup: application
+boot: auto
+init: false
+ingress: true
+homeassistant_api: true
+ingress_port: 8099
+panel_icon: mdi:book-open-variant
+panel_title: Budget Book
+ports:
+  8099/tcp: null
+ports_description:
+  8099/tcp: Budget Book web UI served through Home Assistant ingress
+options:
+  log_level: info
+schema:
+  log_level: list(trace|debug|info|notice|warning|error|fatal)

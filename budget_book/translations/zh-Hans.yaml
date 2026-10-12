@@ -1,0 +1,6 @@
+configuration:
+  log_level:
+    name: 日志级别
+    description: 控制 add-on log 的详细程度。
+network:
+  8099/tcp: Budget Book 网页界面，通过 Home Assistant ingress 使用。

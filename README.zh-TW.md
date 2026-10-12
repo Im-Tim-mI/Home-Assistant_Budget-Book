@@ -2,29 +2,34 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-Home Assistant 自訂整合，提供側邊欄記帳面板、收支統計、分類預算、固定支出與資料匯入匯出功能。資料儲存在 Home Assistant storage，會跟著 HA 備份一起保存。
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+[![Supervisor Add-on](docs/badges/supervisor-addon.svg)](https://developers.home-assistant.io/docs/add-ons/)
 
-目前版本：`v1.1.4`
+記帳本現在改成同一個 GitHub repository 同時支援 **HACS custom integration** 和 **Supervisor Add-on** 安裝。
 
-## 軟體截圖
+- **HACS integration：** 保留原本 Home Assistant entity、sensor、service、側邊欄面板與 HA storage 行為。
+- **Supervisor Add-on：** 使用同一套記帳本介面，透過 ingress 開啟，資料存在 `/data/budget_book.json`，並提供 add-on API。
+- **共用核心：** 前端 UI、語言檔、分析邏輯、資料格式、匯入匯出、範例資料與 migration 放在 `shared/core/`，再同步到兩個 adapter。
 
-### 桌面版
+目前版本：HACS integration `v1.2.0`，Supervisor Add-on `v0.3.0`。
 
-| 總覽 | 英文介面 |
+## 截圖
+
+### HACS Integration
+
+| 總覽 | 交易 |
 | --- | --- |
-| ![總覽畫面](docs/images/screenshot-overview.png) | ![英文總覽畫面](docs/images/screenshot-overview-en.png) |
-
-| 交易 | 語系設定 |
-| --- | --- |
-| ![交易畫面](docs/images/screenshot-transactions.png) | ![語系設定畫面](docs/images/screenshot-settings-language.png) |
+| ![總覽畫面](docs/images/screenshot-overview.png) | ![交易畫面](docs/images/screenshot-transactions.png) |
 
 | 圖表 | 預算 |
 | --- | --- |
 | ![圖表畫面](docs/images/screenshot-charts.png) | ![預算畫面](docs/images/screenshot-budgets.png) |
 
-### 手機版
+### Supervisor Add-on
 
-![手機總覽畫面](docs/images/screenshot-mobile-overview.png)
+| 桌面版 | 手機版 |
+| --- | --- |
+| ![Add-on 桌面畫面](docs/images/addon-zh-Hant-home.png) | <img src="docs/images/addon-zh-Hant-mobile.png" alt="Add-on 手機畫面" width="260"> |
 
 ## 功能
 
@@ -34,75 +39,85 @@ Home Assistant 自訂整合，提供側邊欄記帳面板、收支統計、分�
 - 分類支出、近 6 個月趨勢與預算使用率圖表。
 - 每月分類預算與 80% / 超支提醒。
 - 固定支出規則，每天 09:00 自動檢查並寫入到期項目。
-- JSON 匯入、匯出與範例資料載入。
-- 內建英文、繁體中文、簡體中文介面語系。
+- JSON 匯入、匯出、範例資料載入與清空工具。
+- 內建 English、繁體中文、简体中文介面語系。
 - 自動語系會跟隨 Home Assistant 語系，也可在記帳本設定中手動指定。
-- 服務呼叫後會自動刷新前端狀態，新增、刪除、匯入或切換資料後不需要重新載入 Home Assistant 頁面。
 
-## 語系
+## 安裝
 
-記帳本的前端語系檔放在 `www/locales/`：
+### HACS Custom Repository
 
-- `en.json`
-- `zh-Hant.json`
-- `zh-Hans.json`
+[![開啟 Home Assistant 並在 HACS 中加入此 repository](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=Im-Tim-mI&repository=Home-Assistant_Budget-Book&category=integration)
 
-未來若要新增語系，可以新增一份同 key 的 JSON 檔，再到 `www/app.js` 註冊該語系。
+1. 在 Home Assistant 開啟 HACS。
+2. 點右上角三點選單，選擇 `Custom repositories`。
+3. 加入 repository URL：
 
-## 狀態同步
-
-記帳本會從父層 Home Assistant 前端讀取狀態。由於 Home Assistant 收到新狀態時可能會替換 `hass` 物件，記帳本現在會在每次輪詢前重新取得目前的 `hass`，並在服務呼叫成功後安排短延遲刷新。這可以避免新增交易、刪除交易、匯入資料或切換記帳本後畫面停在舊資料。
-
-## 安裝教學
-
-### Release ZIP
-
-到最新 Release 下載 ZIP：
-
-<https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book/releases/latest>
-
-解壓縮後，將 `budget_book` 資料夾放到：
-
-```bash
-/config/custom_components/budget_book
-```
-
-複製完成後重新啟動 Home Assistant。
-
-### 手動安裝
-
-1. 在 Home Assistant 的設定目錄建立整合資料夾：
-
-   ```bash
-   mkdir -p /config/custom_components/budget_book
+   ```text
+   https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book
    ```
 
-2. 將本專案內容複製到該資料夾。若在 HA 主機上可直接使用 Git：
+4. Category 選 `Integration`。
+5. 安裝 `Home-Assistant 記帳本 (Budget Book)`。
+6. 重新啟動 Home Assistant。
+7. 到「設定」→「裝置與服務」→「新增整合」，搜尋 `Budget Book` 或 `記帳本`。
 
-   ```bash
-   git clone https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book.git /config/custom_components/budget_book
+### Supervisor Add-on Store Repository
+
+[![開啟 Home Assistant 並加入此 add-on repository](docs/badges/add-repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FIm-Tim-mI%2FHome-Assistant_Budget-Book)
+
+1. 開啟 Home Assistant。
+2. 前往「設定」→「Add-ons」→「Add-on Store」。
+3. 點右上角選單，選擇 `Repositories`。
+4. 加入 repository URL：
+
+   ```text
+   https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book
    ```
 
-3. 重新啟動 Home Assistant。
+5. 安裝 `Budget Book`。
+6. 啟動 add-on，從側邊欄或 add-on 頁面開啟。
 
-4. 到「設定」→「裝置與服務」→「新增整合」，搜尋「Home-Assistant 記帳本」、「記帳本」或「Budget Book」並加入。
+### 手動安裝 HACS Integration
 
-5. 加入完成後，左側側邊欄會出現「記帳本」。第一次開啟可先載入範例資料或直接新增交易。
-
-### 更新
-
-若使用 Git 安裝：
+只複製 integration 資料夾到 Home Assistant：
 
 ```bash
-cd /config/custom_components/budget_book
-git pull
+mkdir -p /config/custom_components
+cp -R custom_components/budget_book /config/custom_components/budget_book
 ```
 
-若你是用 ZIP 安裝，請重新下載最新 Release ZIP，並覆蓋原本的 `budget_book` 資料夾。更新後重新啟動 Home Assistant。若仍看到舊畫面，請清除瀏覽器或 App WebView 快取，或重新載入一次 Home Assistant。
+接著重新啟動 Home Assistant，並到「裝置與服務」新增整合。
 
-## 服務
+## 該用哪一種？
 
-整合提供 `budget_book` domain 服務，可從自動化或開發者工具呼叫，例如：
+如果你要原本的 Home Assistant 行為，例如正式註冊的 `budget_book.*` service、HA storage、entity 與 sensor，請用 **HACS integration**。
+
+如果你想用 add-on app、ingress、Docker 隔離與 `/data` 儲存，請用 **Supervisor Add-on**。
+
+不要在同一個 Home Assistant 內同時啟用兩者，除非你刻意讓資料分開。Integration 擁有正式 entity 與 service；Add-on 會透過 Home Assistant API 發佈相容的 `sensor.budget_book_*` 狀態。
+
+## Repository 結構
+
+```text
+.
+├── custom_components/budget_book/   # HACS integration
+├── budget_book/                     # Supervisor Add-on
+├── shared/core/                     # UI、資料格式、分析與 migration 共用來源
+├── scripts/sync_shared_core.py      # 同步共用核心到兩個 adapter
+├── hacs.json
+└── repository.yaml
+```
+
+修改共用功能時，先改 `shared/core/`，再執行：
+
+```bash
+python3 scripts/sync_shared_core.py
+```
+
+## HACS Services
+
+Integration 提供 `budget_book.*` 服務，可從自動化或開發者工具呼叫：
 
 - `budget_book.add_transaction`
 - `budget_book.delete_transaction`
@@ -113,8 +128,17 @@ git pull
 - `budget_book.run_recurring`
 - `budget_book.replace_data`
 
-詳細欄位可參考 `services.yaml`。
+完整欄位定義請看 `custom_components/budget_book/services.yaml`。
+
+## 開發檢查
+
+```bash
+python3 scripts/sync_shared_core.py
+python3 -m py_compile custom_components/budget_book/*.py budget_book/rootfs/app/*.py
+ruby -e 'require "yaml"; YAML.load_file("repository.yaml"); YAML.load_file("budget_book/config.yaml")'
+python3 -m unittest tests/test_addon.py
+```
 
 ## 授權
 
-本專案採用 MIT License。
+MIT
