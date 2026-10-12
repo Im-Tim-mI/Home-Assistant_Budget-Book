@@ -2,18 +2,24 @@
 
 [繁體中文](README.zh-TW.md) | [简体中文](README.zh-CN.md)
 
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 [![Supervisor Add-on](docs/badges/supervisor-addon.svg)](https://developers.home-assistant.io/docs/add-ons/)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
 
-Budget Book is a Home Assistant budgeting app that now supports both **HACS custom integration** and **Supervisor Add-on** installation from this same repository.
+Budget Book is a Home Assistant budgeting app that now supports both **Supervisor Add-on** and **HACS custom integration** installation from this same repository.
 
-- **HACS integration:** keeps the original Home Assistant entity, sensor, service, sidebar panel, and HA storage behavior.
 - **Supervisor Add-on:** runs the same Budget Book interface through ingress, stores data in `/data/budget_book.json`, and provides its own add-on API.
+- **HACS integration:** keeps the original Home Assistant entity, sensor, service, sidebar panel, and HA storage behavior.
 - **Shared core:** frontend UI, language files, analytics, data shape, import/export behavior, sample data, and migration logic are kept in `shared/core/` and synced into both adapters.
 
-Current version: HACS integration and Supervisor Add-on `v1.2.1`.
+Current version: Supervisor Add-on and HACS integration `v1.2.1`.
 
 ## Screenshots
+
+### Supervisor Add-on
+
+| Desktop | Mobile |
+| --- | --- |
+| ![Add-on desktop screen](docs/images/addon-en-home.png) | <img src="docs/images/addon-en-mobile.png" alt="Add-on mobile screen" width="260"> |
 
 ### HACS Integration
 
@@ -24,12 +30,6 @@ Current version: HACS integration and Supervisor Add-on `v1.2.1`.
 | Charts | Budgets |
 | --- | --- |
 | ![Charts screen](docs/images/screenshot-charts.png) | ![Budgets screen](docs/images/screenshot-budgets.png) |
-
-### Supervisor Add-on
-
-| Desktop | Mobile |
-| --- | --- |
-| ![Add-on desktop screen](docs/images/addon-en-home.png) | <img src="docs/images/addon-en-mobile.png" alt="Add-on mobile screen" width="260"> |
 
 ## Features
 
@@ -44,6 +44,22 @@ Current version: HACS integration and Supervisor Add-on `v1.2.1`.
 - Auto language mode follows Home Assistant language, with manual override in Budget Book settings.
 
 ## Installation
+
+### Supervisor Add-on Store Repository
+
+[![Open your Home Assistant instance and add this add-on repository](docs/badges/add-repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FIm-Tim-mI%2FHome-Assistant_Budget-Book)
+
+1. Open Home Assistant.
+2. Go to Settings -> Add-ons -> Add-on Store.
+3. Open the top-right menu and choose `Repositories`.
+4. Add this repository URL:
+
+   ```text
+   https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book
+   ```
+
+5. Install `Budget Book`.
+6. Start the add-on and open it from the sidebar or add-on page.
 
 ### HACS Custom Repository
 
@@ -62,22 +78,6 @@ Current version: HACS integration and Supervisor Add-on `v1.2.1`.
 6. Restart Home Assistant.
 7. Go to Settings -> Devices & services -> Add integration, then search for `Budget Book` or `記帳本`.
 
-### Supervisor Add-on Store Repository
-
-[![Open your Home Assistant instance and add this add-on repository](docs/badges/add-repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2FIm-Tim-mI%2FHome-Assistant_Budget-Book)
-
-1. Open Home Assistant.
-2. Go to Settings -> Add-ons -> Add-on Store.
-3. Open the top-right menu and choose `Repositories`.
-4. Add this repository URL:
-
-   ```text
-   https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book
-   ```
-
-5. Install `Budget Book`.
-6. Start the add-on and open it from the sidebar or add-on page.
-
 ### Manual HACS Integration Install
 
 Copy only the integration folder to Home Assistant:
@@ -91,9 +91,9 @@ Then restart Home Assistant and add the integration from Settings -> Devices & s
 
 ## Which Install Should I Use?
 
-Use **HACS integration** if you want the original behavior: registered HA services, Home Assistant storage, and normal custom integration entities.
-
 Use **Supervisor Add-on** if you prefer an add-on app with ingress, Docker isolation, and `/data` persistence.
+
+Use **HACS integration** if you want the original behavior: registered HA services, Home Assistant storage, and normal custom integration entities.
 
 Do not run both against the same Home Assistant instance unless you intentionally keep their data separate. The integration owns its HA entities and services; the add-on publishes compatibility `sensor.budget_book_*` states through the Home Assistant API.
 
@@ -101,12 +101,12 @@ Do not run both against the same Home Assistant instance unless you intentionall
 
 ```text
 .
-├── custom_components/budget_book/   # HACS integration
 ├── budget_book/                     # Supervisor Add-on
+├── custom_components/budget_book/   # HACS integration
 ├── shared/core/                     # shared source for UI/data/analytics/migration
 ├── scripts/sync_shared_core.py      # syncs shared core into both adapters
-├── hacs.json
-└── repository.yaml
+├── repository.yaml
+└── hacs.json
 ```
 
 When changing shared behavior, edit `shared/core/` first, then run:
