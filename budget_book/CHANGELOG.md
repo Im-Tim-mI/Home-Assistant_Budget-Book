@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.5b2 (beta)
+
+- "Never show this ad" is now a checkbox with a larger, highlighted label. Checking it saves the choice immediately; unchecking it clears the choice.
+
 ## 1.2.5b1 (beta)
 
 - Add a Logitech Taiwan store discount ad: shown on startup with a bottom-left "Never show this ad" option, plus a dedicated Logitech tab.

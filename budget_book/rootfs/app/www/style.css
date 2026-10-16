@@ -619,13 +619,27 @@ a.btn-primary.ad-shop {
 }
 .ad-actions { display: flex; justify-content: flex-end; }
 .modal-footer.ad-footer { justify-content: space-between; align-items: center; flex-wrap: wrap; }
-.ad-footer-actions { display: flex; gap: 8px; }
-.btn-link {
-  background: none;
-  border: none;
-  padding: 8px 0;
-  color: var(--text-muted);
-  text-decoration: underline;
-  font-size: 13px;
+.ad-footer-actions { display: flex; gap: 8px; margin-left: auto; }
+.ad-never-show {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--bg-secondary);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
 }
-.btn-link:hover { background: none; color: var(--text); }
+.ad-never-show:hover { border-color: var(--accent); }
+.ad-never-show:has(input:checked) { border-color: var(--accent); color: var(--accent); }
+.ad-never-show input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}

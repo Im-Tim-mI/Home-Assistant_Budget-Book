@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>記帳本</title>
-  <link rel="stylesheet" href="style.css?v=5" />
+  <link rel="stylesheet" href="style.css?v=6" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -235,7 +235,7 @@
           </div>
           <div class="card">
             <div class="card-header" data-i18n="settings.about">關於</div>
-            <p class="hint" data-i18n="settings.about_text">記帳本 v1.2.5b1 — 整合於 Home Assistant，資料存在 HA storage 並隨著系統備份。</p>
+            <p class="hint" data-i18n="settings.about_text">記帳本 v1.2.5b2 — 整合於 Home Assistant，資料存在 HA storage 並隨著系統備份。</p>
           </div>
         </section>
       </main>
@@ -329,7 +329,10 @@
           <p class="hint" data-i18n="ad.text">結帳頁面輸入折扣碼 LOGITIM 即可使用，可以使用到 2026/12/31。</p>
         </div>
         <div class="modal-footer ad-footer">
-          <button id="ad-never-show" class="btn-link" data-i18n="ad.never_show">永不顯示此廣告</button>
+          <label class="ad-never-show">
+            <input type="checkbox" id="ad-never-show" />
+            <span data-i18n="ad.never_show">永不顯示此廣告</span>
+          </label>
           <div class="ad-footer-actions">
             <button class="btn-secondary" data-close="modal-ad" data-i18n="action.close">關閉</button>
             <a class="btn-primary ad-shop" href="https://store.logitech.tw/discount/LOGITIM" target="_blank" rel="noopener sponsored" data-i18n="ad.shop">前往選購</a>
@@ -433,6 +436,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>

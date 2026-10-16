@@ -811,12 +811,15 @@ function closeModal(id) {
 // Startup ad; the user can opt out permanently (per browser).
 function maybeShowAd() {
   try { if (localStorage.getItem(AD_HIDDEN_STORAGE_KEY) === '1') return; } catch (_) {}
+  $('ad-never-show').checked = false;
   openModal('modal-ad');
 }
 
-function hideAdForever() {
-  try { localStorage.setItem(AD_HIDDEN_STORAGE_KEY, '1'); } catch (_) {}
-  closeModal('modal-ad');
+function setAdHidden(hidden) {
+  try {
+    if (hidden) localStorage.setItem(AD_HIDDEN_STORAGE_KEY, '1');
+    else localStorage.removeItem(AD_HIDDEN_STORAGE_KEY);
+  } catch (_) {}
 }
 
 // ---- Time helpers (stored as 24h "HH:MM") ----
@@ -992,7 +995,7 @@ function bindEvents() {
     b.onclick = () => closeModal(b.dataset.close);
   });
 
-  $('ad-never-show').onclick = hideAdForever;
+  $('ad-never-show').onchange = (e) => setAdHidden(e.target.checked);
 
   // Book switcher
   $('book-switcher').onchange = async (e) => {

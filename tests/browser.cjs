@@ -43,9 +43,19 @@ const root = path.resolve(__dirname, '..');
     await page.locator('#main').waitFor({ state: 'visible' });
     await adModal.waitFor({ state: 'visible' });
     const neverShow = adModal.locator('#ad-never-show');
-    const [adBox, buttonBox] = [await adModal.locator('.modal').boundingBox(), await neverShow.boundingBox()];
-    assert(buttonBox.x - adBox.x < 40 && adBox.y + adBox.height - (buttonBox.y + buttonBox.height) < 40, '"Never show" must sit bottom-left');
-    await neverShow.click();
+    const neverShowLabel = adModal.locator('label.ad-never-show');
+    const [adBox, labelBox] = [await adModal.locator('.modal').boundingBox(), await neverShowLabel.boundingBox()];
+    assert(labelBox.x - adBox.x < 40 && adBox.y + adBox.height - (labelBox.y + labelBox.height) < 40, '"Never show" must sit bottom-left');
+    assert.equal(await neverShow.isChecked(), false);
+    // Clicking the label text toggles the checkbox; toggling off clears the preference again.
+    await neverShowLabel.locator('span').click();
+    assert.equal(await neverShow.isChecked(), true);
+    await neverShow.uncheck();
+    assert.equal(await page.evaluate(() => localStorage.getItem('budgetBookAdHidden')), null);
+    await neverShow.check();
+    assert.equal(await page.evaluate(() => localStorage.getItem('budgetBookAdHidden')), '1');
+    assert(await adModal.isVisible(), 'Checking the box keeps the ad open until the user closes it');
+    await adModal.locator('[data-close="modal-ad"].btn-secondary').click();
     await adModal.waitFor({ state: 'hidden' });
     const tab = name => { console.log('Tab:', name); return page.locator(`[data-tab="${name}"]`).click(); };
     const action = async (service, callback) => {
