@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.5b4 (beta)
+
+- Closing the Logitech ad (Close or ×) hides it for the rest of the day on that device; it shows again the next day. Each device or browser keeps its own state. "Never show this ad" still hides it permanently.
+
 ## 1.2.5b3 (beta)
 
 - The Logitech ad image now has English and Simplified Chinese versions; the app shows the one matching the current language, and each README uses its own language.

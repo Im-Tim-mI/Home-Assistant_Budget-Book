@@ -8,6 +8,7 @@ const fmtSigned = (n) => n == null ? '—' : (n >= 0 ? '+' : '') + Math.round(n)
 const SUPPORTED_LANGS = ['en', 'zh-Hant', 'zh-Hans'];
 const LOCALE_STORAGE_KEY = 'budgetBookLanguage';
 const AD_HIDDEN_STORAGE_KEY = 'budgetBookAdHidden';
+const AD_DISMISSED_ON_STORAGE_KEY = 'budgetBookAdDismissedOn';
 const SIDEBAR_TITLE_BY_LANG = {
   en: 'Budget Book',
   'zh-Hant': '記帳本',
@@ -811,11 +812,20 @@ function closeModal(id) {
   $(id).style.display = 'none';
 }
 
-// Startup ad; the user can opt out permanently (per browser).
+// Startup ad, shown at most once per day per browser/device after it is closed;
+// the user can also opt out permanently.
 function maybeShowAd() {
-  try { if (localStorage.getItem(AD_HIDDEN_STORAGE_KEY) === '1') return; } catch (_) {}
+  try {
+    if (localStorage.getItem(AD_HIDDEN_STORAGE_KEY) === '1') return;
+    if (localStorage.getItem(AD_DISMISSED_ON_STORAGE_KEY) === localDateStr(new Date())) return;
+  } catch (_) {}
   $('ad-never-show').checked = false;
   openModal('modal-ad');
+}
+
+function closeAd() {
+  try { localStorage.setItem(AD_DISMISSED_ON_STORAGE_KEY, localDateStr(new Date())); } catch (_) {}
+  closeModal('modal-ad');
 }
 
 function setAdHidden(hidden) {
@@ -995,7 +1005,7 @@ function bindEvents() {
 
   // Modal close buttons
   document.querySelectorAll('[data-close]').forEach(b => {
-    b.onclick = () => closeModal(b.dataset.close);
+    b.onclick = () => b.dataset.close === 'modal-ad' ? closeAd() : closeModal(b.dataset.close);
   });
 
   $('ad-never-show').onchange = (e) => setAdHidden(e.target.checked);

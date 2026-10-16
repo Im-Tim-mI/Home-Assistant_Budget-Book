@@ -30,18 +30,33 @@ const root = path.resolve(__dirname, '..');
     page.on('console', msg => { if (/Render error|Bootstrap fatal|bindEvents error/.test(msg.text())) errors.push(msg.text()); });
     page.on('response', response => { if (response.status() >= 400 && !response.url().endsWith('favicon.ico')) errors.push(response.status() + ' ' + response.url()); });
     page.on('dialog', dialog => dialog.accept());
-    await page.goto(base);
-    await page.locator('#main').waitFor({ state: 'visible' });
-    // Startup ad: closing only dismisses it for now; "never show" persists across reloads.
-    const adModal = page.locator('#modal-ad');
+    // Startup ad, on its own device (browser context) with a controlled clock:
+    // closing hides it for the rest of the local day; "never show" hides it for good.
+    const adPage = await browser.newPage({ viewport: { width: 1440, height: 1000 }, locale: 'zh-TW' });
+    const adModal = adPage.locator('#modal-ad');
+    const openAt = async (iso) => {
+      await adPage.clock.setFixedTime(new Date(iso));
+      await adPage.goto(base);
+      await adPage.locator('#main').waitFor({ state: 'visible' });
+      await adPage.waitForTimeout(300);
+    };
+    await openAt('2026-10-17T09:00:00');
     await adModal.waitFor({ state: 'visible' });
     assert(await adModal.locator('img').evaluate(img => img.complete && img.naturalWidth > 0), 'Ad image must load');
     assert.equal(await adModal.locator('a.ad-banner').getAttribute('href'), 'https://store.logitech.tw/discount/LOGITIM');
     await adModal.locator('.modal-close').click();
     await adModal.waitFor({ state: 'hidden' });
-    await page.reload();
-    await page.locator('#main').waitFor({ state: 'visible' });
-    await adModal.waitFor({ state: 'visible' });
+    assert.equal(await adPage.evaluate(() => localStorage.getItem('budgetBookAdDismissedOn')), '2026-10-17');
+    await openAt('2026-10-17T23:59:00');
+    assert.equal(await adModal.isVisible(), false, 'Closed ad stays hidden for the rest of the day');
+    await openAt('2026-10-18T00:01:00');
+    assert(await adModal.isVisible(), 'Closed ad returns the next day');
+    // Another device has its own state and still shows the ad today.
+    const otherDevice = await browser.newPage();
+    await otherDevice.clock.setFixedTime(new Date('2026-10-18T00:02:00'));
+    await otherDevice.goto(base);
+    await otherDevice.locator('#modal-ad').waitFor({ state: 'visible' });
+    await otherDevice.close();
     const neverShow = adModal.locator('#ad-never-show');
     const neverShowLabel = adModal.locator('label.ad-never-show');
     const [adBox, labelBox] = [await adModal.locator('.modal').boundingBox(), await neverShowLabel.boundingBox()];
@@ -51,12 +66,22 @@ const root = path.resolve(__dirname, '..');
     await neverShowLabel.locator('span').click();
     assert.equal(await neverShow.isChecked(), true);
     await neverShow.uncheck();
-    assert.equal(await page.evaluate(() => localStorage.getItem('budgetBookAdHidden')), null);
+    assert.equal(await adPage.evaluate(() => localStorage.getItem('budgetBookAdHidden')), null);
     await neverShow.check();
-    assert.equal(await page.evaluate(() => localStorage.getItem('budgetBookAdHidden')), '1');
+    assert.equal(await adPage.evaluate(() => localStorage.getItem('budgetBookAdHidden')), '1');
     assert(await adModal.isVisible(), 'Checking the box keeps the ad open until the user closes it');
     await adModal.locator('[data-close="modal-ad"].btn-secondary').click();
     await adModal.waitFor({ state: 'hidden' });
+    await openAt('2026-10-25T09:00:00');
+    assert.equal(await adModal.isVisible(), false, '"Never show" hides the ad on later days too');
+    await adPage.close();
+
+    // Main device: dismiss today's ad before exercising the rest of the UI.
+    await page.goto(base);
+    await page.locator('#main').waitFor({ state: 'visible' });
+    await page.locator('#modal-ad').waitFor({ state: 'visible' });
+    await page.locator('#modal-ad .modal-close').click();
+    await page.locator('#modal-ad').waitFor({ state: 'hidden' });
     const tab = name => { console.log('Tab:', name); return page.locator(`[data-tab="${name}"]`).click(); };
     const action = async (service, callback) => {
       const response = page.waitForResponse(r => r.url().endsWith('/' + service) && r.request().method() === 'POST');
@@ -132,7 +157,7 @@ const root = path.resolve(__dirname, '..');
     await page.reload();
     await page.locator('#main').waitFor({ state: 'visible' });
     await page.waitForTimeout(300);
-    assert.equal(await adModal.isVisible(), false, 'Ad stays hidden after "never show"');
+    assert.equal(await page.locator('#modal-ad').isVisible(), false, 'Ad closed today stays hidden after reload');
 
     const shell = await browser.newPage({ viewport: { width: 1000, height: 800 }, locale: 'zh-CN' });
     try {
@@ -194,7 +219,7 @@ const root = path.resolve(__dirname, '..');
       await page.setViewportSize({ width: 1440, height: 1000 });
     }
     assert.deepEqual(errors, []);
-    console.log('PASS: UI CRUD, filters, budget/category, recurring, books, JSON export/import, eight tabs x three languages, startup ad + never-show, chart pixels, mobile layout, ingress-prefixed requests.');
+    console.log('PASS: UI CRUD, filters, budget/category, recurring, books, JSON export/import, eight tabs x three languages, startup ad once per day per device + never-show, chart pixels, mobile layout, ingress-prefixed requests.');
   } catch (error) {
     console.error(error);
     throw error;
