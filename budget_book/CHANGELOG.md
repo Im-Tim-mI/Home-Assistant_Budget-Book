@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.5b3 (beta)
+
+- The Logitech ad image now has English and Simplified Chinese versions; the app shows the one matching the current language, and each README uses its own language.
+
 ## 1.2.5b2 (beta)
 
 - "Never show this ad" is now a checkbox with a larger, highlighted label. Checking it saves the choice immediately; unchecking it clears the choice.

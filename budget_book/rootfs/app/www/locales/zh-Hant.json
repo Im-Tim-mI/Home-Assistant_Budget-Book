@@ -76,7 +76,7 @@
   "settings.language": "語系",
   "settings.language_hint": "自動模式會跟隨 Home Assistant 語系。你也可以在此瀏覽器手動指定語系。",
   "settings.about": "關於",
-  "settings.about_text": "記帳本 Add-on v1.2.5b2 · 移植自記帳本 v1.2.5b2，資料儲存在 /data/budget_book.json。",
+  "settings.about_text": "記帳本 Add-on v1.2.5b3 · 移植自記帳本 v1.2.5b3，資料儲存在 /data/budget_book.json。",
   "settings.new_book": "+ 新增記帳本",
   "settings.export": "匯出 JSON",
   "settings.import": "匯入 JSON",
@@ -173,5 +173,6 @@
   "ad.title": "羅技 Logi 網路旗艦店 電競類別九折",
   "ad.text": "結帳頁面輸入折扣碼 LOGITIM 即可使用，可以使用到 2026/12/31。",
   "ad.shop": "前往選購",
-  "ad.never_show": "永不顯示此廣告"
+  "ad.never_show": "永不顯示此廣告",
+  "ad.image": "ad-logitech-logitim-zh-Hant.png"
 }

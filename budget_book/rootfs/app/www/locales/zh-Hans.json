@@ -76,7 +76,7 @@
   "settings.language": "语言",
   "settings.language_hint": "自动模式会跟随 Home Assistant 语言。你也可以在此浏览器手动指定语言。",
   "settings.about": "关于",
-  "settings.about_text": "记账本 Add-on v1.2.5b2 · 移植自记账本 v1.2.5b2，数据存放在 /data/budget_book.json。",
+  "settings.about_text": "记账本 Add-on v1.2.5b3 · 移植自记账本 v1.2.5b3，数据存放在 /data/budget_book.json。",
   "settings.new_book": "+ 新增记账本",
   "settings.export": "导出 JSON",
   "settings.import": "导入 JSON",
@@ -173,5 +173,6 @@
   "ad.title": "罗技 Logi 台湾网络旗舰店 电竞类别九折",
   "ad.text": "结账页面输入折扣码 LOGITIM 即可使用，有效期至 2026/12/31。",
   "ad.shop": "前往选购",
-  "ad.never_show": "永不显示此广告"
+  "ad.never_show": "永不显示此广告",
+  "ad.image": "ad-logitech-logitim-zh-Hans.png"
 }

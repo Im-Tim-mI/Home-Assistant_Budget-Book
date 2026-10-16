@@ -138,6 +138,9 @@ function translateDocument() {
   document.querySelectorAll('[data-i18n-title]').forEach((el) => {
     el.setAttribute('title', t(el.dataset.i18nTitle));
   });
+  document.querySelectorAll('[data-i18n-src]').forEach((el) => {
+    el.setAttribute('src', t(el.dataset.i18nSrc));
+  });
   const langSelect = $('language-select');
   if (langSelect) langSelect.value = localeChoice;
 }

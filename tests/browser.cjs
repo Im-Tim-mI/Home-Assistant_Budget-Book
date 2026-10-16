@@ -172,6 +172,11 @@ const root = path.resolve(__dirname, '..');
       for (const name of ['home', 'tx', 'charts', 'categories', 'budgets', 'logitech', 'recurring', 'settings']) {
         await tab(name);
         await page.locator(`#tab-${name}.active`).waitFor();
+        if (name === 'logitech') {
+          const img = page.locator('#tab-logitech .ad-banner img');
+          assert.equal(await img.getAttribute('src'), `ad-logitech-logitim-${lang}.png`);
+          await page.waitForFunction(el => el.complete && el.naturalWidth > 0, await img.elementHandle());
+        }
         if (name === 'charts') {
           await page.waitForTimeout(500);
           const nonblank = await page.locator('canvas').evaluateAll(canvases => canvases.every(c => {

@@ -1,6 +1,6 @@
 # Budget Book
 
-Home Assistant Supervisor Add-on port of the [Budget Book](https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book) custom integration (v1.2.5b2), with the same panel UI and features. This add-on lives in the same repository as the HACS integration.
+Home Assistant Supervisor Add-on port of the [Budget Book](https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book) custom integration (v1.2.5b3), with the same panel UI and features. This add-on lives in the same repository as the HACS integration.
 
 ## Features
 
@@ -17,4 +17,4 @@ See [DOCS.md](DOCS.md).
 
 ## Current Version
 
-`1.2.5b2`
+`1.2.5b3`
