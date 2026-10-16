@@ -14,11 +14,13 @@
   "action.switch": "切換",
   "action.delete": "刪除",
   "action.set": "設定",
+  "action.close": "關閉",
   "tab.home": "總覽",
   "tab.transactions": "交易",
   "tab.charts": "圖表",
   "tab.categories": "分類",
   "tab.budgets": "預算",
+  "tab.logitech": "羅技",
   "tab.recurring": "固定支出",
   "tab.settings": "設定",
   "metric.month_expense": "本月支出",
@@ -74,7 +76,7 @@
   "settings.language": "語系",
   "settings.language_hint": "自動模式會跟隨 Home Assistant 語系。你也可以在此瀏覽器手動指定語系。",
   "settings.about": "關於",
-  "settings.about_text": "記帳本 Add-on v1.2.4 · 移植自記帳本 v1.2.4，資料儲存在 /data/budget_book.json。",
+  "settings.about_text": "記帳本 Add-on v1.2.5b1 · 移植自記帳本 v1.2.5b1，資料儲存在 /data/budget_book.json。",
   "settings.new_book": "+ 新增記帳本",
   "settings.export": "匯出 JSON",
   "settings.import": "匯入 JSON",
@@ -167,5 +169,9 @@
   "category.bonus": "獎金",
   "category.investment": "投資",
   "category.side": "副業",
-  "category.income_other": "其他收入"
+  "category.income_other": "其他收入",
+  "ad.title": "羅技 Logi 網路旗艦店 電競類別九折",
+  "ad.text": "結帳頁面輸入折扣碼 LOGITIM 即可使用，可以使用到 2026/12/31。",
+  "ad.shop": "前往選購",
+  "ad.never_show": "永不顯示此廣告"
 }

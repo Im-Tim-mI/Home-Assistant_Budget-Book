@@ -596,3 +596,36 @@ button:hover { background: var(--bg-secondary); }
   font-size: 11px;
   color: var(--text-muted);
 }
+
+/* Logitech ad */
+.modal.modal-ad { max-width: 760px; }
+.ad-banner { display: block; margin: 8px 0 12px; }
+.ad-banner img {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  margin: 0 auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+a.btn-primary.ad-shop {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent);
+  text-decoration: none;
+  font-size: 14px;
+}
+.ad-actions { display: flex; justify-content: flex-end; }
+.modal-footer.ad-footer { justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.ad-footer-actions { display: flex; gap: 8px; }
+.btn-link {
+  background: none;
+  border: none;
+  padding: 8px 0;
+  color: var(--text-muted);
+  text-decoration: underline;
+  font-size: 13px;
+}
+.btn-link:hover { background: none; color: var(--text); }

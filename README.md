@@ -11,7 +11,15 @@ Budget Book is a Home Assistant budgeting app that now supports both **Superviso
 - **HACS integration:** keeps the original Home Assistant entity, sensor, service, sidebar panel, and HA storage behavior.
 - **Shared core:** frontend UI, language files, analytics, data shape, import/export behavior, sample data, and migration logic are kept in `shared/core/` and synced into both adapters.
 
-Current version: Supervisor Add-on and HACS integration `v1.2.4`.
+Current version: Supervisor Add-on and HACS integration `v1.2.5b1`.
+
+## Sponsored: Logitech Taiwan Online Store discount
+
+Get **10% off gaming products** at the Logitech Taiwan official online store with code **`LOGITIM`**. Enter it on the checkout page. Valid until **2026/12/31**.
+
+[![Logitech Taiwan gaming 10% off with code LOGITIM](docs/images/ad-logitech-logitim.png)](https://store.logitech.tw/discount/LOGITIM)
+
+👉 [Shop with the discount applied](https://store.logitech.tw/discount/LOGITIM)
 
 ## Screenshots
 

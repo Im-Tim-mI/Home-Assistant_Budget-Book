@@ -14,11 +14,13 @@
   "action.switch": "切换",
   "action.delete": "删除",
   "action.set": "设置",
+  "action.close": "关闭",
   "tab.home": "总览",
   "tab.transactions": "交易",
   "tab.charts": "图表",
   "tab.categories": "分类",
   "tab.budgets": "预算",
+  "tab.logitech": "罗技",
   "tab.recurring": "固定支出",
   "tab.settings": "设置",
   "metric.month_expense": "本月支出",
@@ -74,7 +76,7 @@
   "settings.language": "语言",
   "settings.language_hint": "自动模式会跟随 Home Assistant 语言。你也可以在此浏览器手动指定语言。",
   "settings.about": "关于",
-  "settings.about_text": "记账本 v1.2.4 — 集成于 Home Assistant，数据储存在 HA storage，并随系统备份保存。",
+  "settings.about_text": "记账本 v1.2.5b1 — 集成于 Home Assistant，数据储存在 HA storage，并随系统备份保存。",
   "settings.new_book": "+ 新增记账本",
   "settings.export": "导出 JSON",
   "settings.import": "导入 JSON",
@@ -167,5 +169,9 @@
   "category.bonus": "奖金",
   "category.investment": "投资",
   "category.side": "副业",
-  "category.income_other": "其他收入"
+  "category.income_other": "其他收入",
+  "ad.title": "罗技 Logi 台湾网络旗舰店 电竞类别九折",
+  "ad.text": "结账页面输入折扣码 LOGITIM 即可使用，有效期至 2026/12/31。",
+  "ad.shop": "前往选购",
+  "ad.never_show": "永不显示此广告"
 }

@@ -11,7 +11,15 @@
 - **HACS integration：** 保留原本 Home Assistant entity、sensor、service、侧边栏面板与 HA storage 行为。
 - **共用核心：** 前端 UI、语言文件、分析逻辑、数据格式、导入导出、示例数据与 migration 放在 `shared/core/`，再同步到两个 adapter。
 
-当前版本：Supervisor Add-on 与 HACS integration 皆为 `v1.2.4`。
+当前版本：Supervisor Add-on 与 HACS integration 皆为 `v1.2.5b1`。
+
+## 广告：罗技 Logi 台湾网络旗舰店折扣码
+
+罗技 Logi 台湾网络旗舰店**电竞类别九折**，结账页面输入折扣码 **`LOGITIM`** 即可使用，有效期至 **2026/12/31**。
+
+[![罗技电竞类别九折折扣码 LOGITIM](docs/images/ad-logitech-logitim.png)](https://store.logitech.tw/discount/LOGITIM)
+
+👉 [点此前往并自动套用折扣](https://store.logitech.tw/discount/LOGITIM)
 
 ## 截图
 

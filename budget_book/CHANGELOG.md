@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.5b1 (beta)
+
+- Add a Logitech Taiwan store discount ad: shown on startup with a bottom-left "Never show this ad" option, plus a dedicated Logitech tab.
+- Add the same ad to the README in English, Traditional Chinese and Simplified Chinese.
+
 ## 1.2.4
 
 - Recurring rules set to day 29, 30 or 31 now run on the last day of shorter months (Feb 28/29, Apr 30, ...) instead of always on the 28th.

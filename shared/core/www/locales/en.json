@@ -14,11 +14,13 @@
   "action.switch": "Switch",
   "action.delete": "Delete",
   "action.set": "Set",
+  "action.close": "Close",
   "tab.home": "Overview",
   "tab.transactions": "Transactions",
   "tab.charts": "Charts",
   "tab.categories": "Categories",
   "tab.budgets": "Budgets",
+  "tab.logitech": "Logitech",
   "tab.recurring": "Recurring",
   "tab.settings": "Settings",
   "metric.month_expense": "Monthly expenses",
@@ -74,7 +76,7 @@
   "settings.language": "Language",
   "settings.language_hint": "Auto follows the Home Assistant language. Choose a language here to override it for this browser.",
   "settings.about": "About",
-  "settings.about_text": "Budget Book v1.2.4 — integrated with Home Assistant. Data is stored in HA storage and included in system backups.",
+  "settings.about_text": "Budget Book v1.2.5b1 — integrated with Home Assistant. Data is stored in HA storage and included in system backups.",
   "settings.new_book": "+ New budget book",
   "settings.export": "Export JSON",
   "settings.import": "Import JSON",
@@ -167,5 +169,9 @@
   "category.bonus": "Bonus",
   "category.investment": "Investments",
   "category.side": "Side income",
-  "category.income_other": "Other income"
+  "category.income_other": "Other income",
+  "ad.title": "Logitech Taiwan Online Store: 10% off gaming",
+  "ad.text": "Enter code LOGITIM on the checkout page. Valid until 2026/12/31.",
+  "ad.shop": "Shop now",
+  "ad.never_show": "Never show this ad"
 }

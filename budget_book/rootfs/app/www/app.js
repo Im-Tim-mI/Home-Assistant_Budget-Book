@@ -7,6 +7,7 @@ const fmt = (n) => n == null ? '—' : Math.round(n).toLocaleString(currentLangu
 const fmtSigned = (n) => n == null ? '—' : (n >= 0 ? '+' : '') + Math.round(n).toLocaleString(currentLanguage);
 const SUPPORTED_LANGS = ['en', 'zh-Hant', 'zh-Hans'];
 const LOCALE_STORAGE_KEY = 'budgetBookLanguage';
+const AD_HIDDEN_STORAGE_KEY = 'budgetBookAdHidden';
 const SIDEBAR_TITLE_BY_LANG = {
   en: 'Budget Book',
   'zh-Hant': '記帳本',
@@ -807,6 +808,17 @@ function closeModal(id) {
   $(id).style.display = 'none';
 }
 
+// Startup ad; the user can opt out permanently (per browser).
+function maybeShowAd() {
+  try { if (localStorage.getItem(AD_HIDDEN_STORAGE_KEY) === '1') return; } catch (_) {}
+  openModal('modal-ad');
+}
+
+function hideAdForever() {
+  try { localStorage.setItem(AD_HIDDEN_STORAGE_KEY, '1'); } catch (_) {}
+  closeModal('modal-ad');
+}
+
 // ---- Time helpers (stored as 24h "HH:MM") ----
 function initTimePicker() {
   $('tx-hour').innerHTML = Array.from({ length: 12 }, (_, i) => i + 1)
@@ -979,6 +991,8 @@ function bindEvents() {
   document.querySelectorAll('[data-close]').forEach(b => {
     b.onclick = () => closeModal(b.dataset.close);
   });
+
+  $('ad-never-show').onclick = hideAdForever;
 
   // Book switcher
   $('book-switcher').onchange = async (e) => {
@@ -1172,6 +1186,7 @@ function bindEvents() {
     $('loading').style.display = 'none';
     $('main').style.display = 'block';
     render();
+    maybeShowAd();
   }
 })().catch(e => {
   log('Bootstrap fatal:', e.message);

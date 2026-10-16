@@ -32,6 +32,21 @@ const root = path.resolve(__dirname, '..');
     page.on('dialog', dialog => dialog.accept());
     await page.goto(base);
     await page.locator('#main').waitFor({ state: 'visible' });
+    // Startup ad: closing only dismisses it for now; "never show" persists across reloads.
+    const adModal = page.locator('#modal-ad');
+    await adModal.waitFor({ state: 'visible' });
+    assert(await adModal.locator('img').evaluate(img => img.complete && img.naturalWidth > 0), 'Ad image must load');
+    assert.equal(await adModal.locator('a.ad-banner').getAttribute('href'), 'https://store.logitech.tw/discount/LOGITIM');
+    await adModal.locator('.modal-close').click();
+    await adModal.waitFor({ state: 'hidden' });
+    await page.reload();
+    await page.locator('#main').waitFor({ state: 'visible' });
+    await adModal.waitFor({ state: 'visible' });
+    const neverShow = adModal.locator('#ad-never-show');
+    const [adBox, buttonBox] = [await adModal.locator('.modal').boundingBox(), await neverShow.boundingBox()];
+    assert(buttonBox.x - adBox.x < 40 && adBox.y + adBox.height - (buttonBox.y + buttonBox.height) < 40, '"Never show" must sit bottom-left');
+    await neverShow.click();
+    await adModal.waitFor({ state: 'hidden' });
     const tab = name => { console.log('Tab:', name); return page.locator(`[data-tab="${name}"]`).click(); };
     const action = async (service, callback) => {
       const response = page.waitForResponse(r => r.url().endsWith('/' + service) && r.request().method() === 'POST');
@@ -106,6 +121,8 @@ const root = path.resolve(__dirname, '..');
     await action('load_sample', () => page.locator('#btn-load-sample').click());
     await page.reload();
     await page.locator('#main').waitFor({ state: 'visible' });
+    await page.waitForTimeout(300);
+    assert.equal(await adModal.isVisible(), false, 'Ad stays hidden after "never show"');
 
     const shell = await browser.newPage({ viewport: { width: 1000, height: 800 }, locale: 'zh-CN' });
     try {
@@ -142,7 +159,7 @@ const root = path.resolve(__dirname, '..');
       await tab('settings');
       await page.locator('#language-select').selectOption(lang);
       assert.equal(await page.locator('html').getAttribute('lang'), lang);
-      for (const name of ['home', 'tx', 'charts', 'categories', 'budgets', 'recurring', 'settings']) {
+      for (const name of ['home', 'tx', 'charts', 'categories', 'budgets', 'logitech', 'recurring', 'settings']) {
         await tab(name);
         await page.locator(`#tab-${name}.active`).waitFor();
         if (name === 'charts') {
@@ -162,7 +179,7 @@ const root = path.resolve(__dirname, '..');
       await page.setViewportSize({ width: 1440, height: 1000 });
     }
     assert.deepEqual(errors, []);
-    console.log('PASS: UI CRUD, filters, budget/category, recurring, books, JSON export/import, seven tabs x three languages, chart pixels, mobile layout, ingress-prefixed requests.');
+    console.log('PASS: UI CRUD, filters, budget/category, recurring, books, JSON export/import, eight tabs x three languages, startup ad + never-show, chart pixels, mobile layout, ingress-prefixed requests.');
   } catch (error) {
     console.error(error);
     throw error;
