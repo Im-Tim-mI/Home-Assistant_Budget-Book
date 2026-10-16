@@ -1,6 +1,7 @@
 """Analytics computations for Budget Book."""
 from __future__ import annotations
 
+import calendar
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 from typing import Any
@@ -17,6 +18,11 @@ def month_range(year: int, month: int) -> tuple[date, date]:
     else:
         end = date(year, month + 1, 1) - timedelta(days=1)
     return start, end
+
+
+def effective_day(day_of_month: int, year: int, month: int) -> int:
+    """Clamp 29/30/31 to the last day of shorter months."""
+    return min(day_of_month, calendar.monthrange(year, month)[1])
 
 
 def compute_book_metrics(book: dict[str, Any], today: date | None = None) -> dict[str, Any]:
@@ -119,18 +125,13 @@ def compute_book_metrics(book: dict[str, Any], today: date | None = None) -> dic
         if not rule.get("active", True):
             continue
         # Find next due date based on day_of_month
-        day = min(rule["day_of_month"], 28)  # safe day
+        day_of_month = rule["day_of_month"]
         # Try this month first
-        try:
-            due = date(today.year, today.month, day)
-        except ValueError:
-            due = m_end
+        due = date(today.year, today.month, effective_day(day_of_month, today.year, today.month))
         if due < today:
             # next month
-            if today.month == 12:
-                due = date(today.year + 1, 1, day)
-            else:
-                due = date(today.year, today.month + 1, day)
+            ny, nm = (today.year + 1, 1) if today.month == 12 else (today.year, today.month + 1)
+            due = date(ny, nm, effective_day(day_of_month, ny, nm))
         days_until = (due - today).days
         recurring_upcoming.append({
             "id": rule["id"],
@@ -171,7 +172,7 @@ def find_due_recurring(book: dict[str, Any], today: date | None = None) -> list[
     for rule in book.get("recurring", []):
         if not rule.get("active", True):
             continue
-        day = min(rule["day_of_month"], 28)
+        day = effective_day(rule["day_of_month"], today.year, today.month)
         # If we're past the day this month, and last_run is not this month, it's due
         if today.day < day:
             continue

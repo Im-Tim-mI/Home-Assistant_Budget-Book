@@ -9,6 +9,7 @@ from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'budget_book/rootfs/app'))
+import analytics
 import server
 from persistence import normalize_data
 from store import BudgetStore
@@ -79,6 +80,36 @@ class AddonTests(unittest.TestCase):
         self.assertEqual(self.book['transactions'][0]['recurring_id'], rid)
         self.call('delete_recurring', recurring_id=rid)
         self.assertEqual(self.book['recurring'], [])
+
+    def test_recurring_end_of_month_falls_back_to_last_day(self):
+        book = {'recurring': [{'id': 'r31', 'name': 'Salary', 'amount': 1, 'type': 'income',
+                               'category': 'salary', 'day_of_month': 31, 'active': True}]}
+        cases = [
+            (date(2026, 1, 30), False), (date(2026, 1, 31), True),
+            (date(2026, 2, 27), False), (date(2026, 2, 28), True),
+            (date(2028, 2, 28), False), (date(2028, 2, 29), True),
+            (date(2026, 4, 29), False), (date(2026, 4, 30), True),
+        ]
+        for today, expected in cases:
+            with self.subTest(today=today):
+                self.assertEqual(bool(analytics.find_due_recurring(book, today)), expected)
+
+        book['recurring'][0]['day_of_month'] = 30
+        self.assertFalse(analytics.find_due_recurring(book, date(2026, 1, 29)))
+        self.assertTrue(analytics.find_due_recurring(book, date(2026, 2, 28)))
+
+        # Upcoming due date uses the target month's last day, including across years.
+        book['recurring'][0]['day_of_month'] = 31
+        def upcoming(today):
+            return analytics.compute_book_metrics(book, today)['recurring_upcoming'][0]['due_date']
+        self.assertEqual(upcoming(date(2026, 2, 10)), '2026-02-28')
+        self.assertEqual(upcoming(date(2026, 3, 31)), '2026-03-31')
+        self.assertEqual(upcoming(date(2026, 4, 1)), '2026-04-30')
+        self.assertEqual(upcoming(date(2028, 1, 31)), '2028-01-31')
+        self.assertEqual(upcoming(date(2026, 12, 15)), '2026-12-31')
+        book['recurring'][0]['day_of_month'] = 29
+        self.assertEqual(upcoming(date(2026, 1, 30)), '2026-02-28')
+        self.assertEqual(upcoming(date(2028, 1, 30)), '2028-02-29')
 
     def test_import_export_sample_and_clear(self):
         self.call('load_sample')

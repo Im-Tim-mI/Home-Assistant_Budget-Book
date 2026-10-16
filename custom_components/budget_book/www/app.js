@@ -470,10 +470,14 @@ function renderHome() {
   } else {
     const today = new Date();
     const upcoming = recurring.map(r => {
-      const day = Math.min(r.day_of_month, 28);
-      let due = new Date(today.getFullYear(), today.getMonth(), day);
+      // 29/30/31 fall back to the last day of shorter months
+      const dueIn = (year, month) => {
+        const lastDay = new Date(year, month + 1, 0).getDate();
+        return new Date(year, month, Math.min(r.day_of_month, lastDay));
+      };
+      let due = dueIn(today.getFullYear(), today.getMonth());
       if (due < today) {
-        due = new Date(today.getFullYear(), today.getMonth() + 1, day);
+        due = dueIn(today.getFullYear(), today.getMonth() + 1);
       }
       const daysUntil = Math.ceil((due - today) / 86400000);
       return { ...r, due, daysUntil };
