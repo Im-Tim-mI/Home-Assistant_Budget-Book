@@ -1,5 +1,5 @@
 name: Budget Book
-version: "1.2.3"
+version: "1.2.4"
 slug: budget_book
 description: Original Budget Book interface and features, packaged as a Supervisor add-on.
 url: https://github.com/Im-Tim-mI/Home-Assistant_Budget-Book

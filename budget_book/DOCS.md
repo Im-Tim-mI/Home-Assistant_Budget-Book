@@ -2,7 +2,7 @@
 
 ## Opening the App
 
-After installing and starting the add-on, open Budget Book from the Home Assistant sidebar or from the add-on page. The UI is the same panel as the Budget Book custom integration v1.2.3.
+After installing and starting the add-on, open Budget Book from the Home Assistant sidebar or from the add-on page. The UI is the same panel as the Budget Book custom integration v1.2.4.
 
 ## Data Storage
 

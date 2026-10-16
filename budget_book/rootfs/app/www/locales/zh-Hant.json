@@ -74,7 +74,7 @@
   "settings.language": "語系",
   "settings.language_hint": "自動模式會跟隨 Home Assistant 語系。你也可以在此瀏覽器手動指定語系。",
   "settings.about": "關於",
-  "settings.about_text": "記帳本 Add-on v1.2.3 · 移植自記帳本 v1.2.3，資料儲存在 /data/budget_book.json。",
+  "settings.about_text": "記帳本 Add-on v1.2.4 · 移植自記帳本 v1.2.4，資料儲存在 /data/budget_book.json。",
   "settings.new_book": "+ 新增記帳本",
   "settings.export": "匯出 JSON",
   "settings.import": "匯入 JSON",

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.4
+
+- Recurring rules set to day 29, 30 or 31 now run on the last day of shorter months (Feb 28/29, Apr 30, ...) instead of always on the 28th.
+- Home panel "upcoming" list shows the "today" badge for rules due today instead of moving them to next month.
+- Upcoming due dates are shown in local time (previously one day early in UTC+ timezones).
+- Add analytics tests covering the shared core, HACS integration and add-on copies.
+
 ## 1.2.3
 
 - Add root-level HACS brand assets (`brand/icon.png`, `brand/icon@2x.png`, `brand/icon.svg`) so the HACS repository list can show the Budget Book icon.
