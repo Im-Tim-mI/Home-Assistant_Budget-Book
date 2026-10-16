@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.5
+
+- Add the Logitech promotion to the startup dialog, dedicated tab, and all three READMEs.
+- Closing the ad hides it for the current local day on that device/browser; other devices keep their own dismissal state.
+- Add a prominent bottom-left "Never show this ad" checkbox with immediate persistence.
+- Localize promotion images for English, Traditional Chinese, and Simplified Chinese.
+- Improve mobile dialog button alignment.
+- Ship the same shared features for HACS and Supervisor Add-on installations.
+
 ## 1.2.5b4 (beta)
 
 - Closing the Logitech ad (Close or ×) hides it for the rest of the day on that device; it shows again the next day. Each device or browser keeps its own state. "Never show this ad" still hides it permanently.

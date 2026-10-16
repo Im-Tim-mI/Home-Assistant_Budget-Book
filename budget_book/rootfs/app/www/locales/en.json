@@ -76,7 +76,7 @@
   "settings.language": "Language",
   "settings.language_hint": "Auto follows the Home Assistant language. Choose a language here to override it for this browser.",
   "settings.about": "About",
-  "settings.about_text": "Budget Book Add-on v1.2.5b4 · Ported from Budget Book v1.2.5b4, stored in /data/budget_book.json.",
+  "settings.about_text": "Budget Book Add-on v1.2.5 · Ported from Budget Book v1.2.5, stored in /data/budget_book.json.",
   "settings.new_book": "+ New budget book",
   "settings.export": "Export JSON",
   "settings.import": "Import JSON",
