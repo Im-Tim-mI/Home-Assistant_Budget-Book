@@ -136,7 +136,7 @@ Integration 提供 `budget_book.*` 服務，可從自動化或開發者工具呼
 python3 scripts/sync_shared_core.py
 python3 -m py_compile custom_components/budget_book/*.py budget_book/rootfs/app/*.py
 ruby -e 'require "yaml"; YAML.load_file("repository.yaml"); YAML.load_file("budget_book/config.yaml")'
-python3 -m unittest tests/test_addon.py
+python3 -m unittest tests/test_addon.py tests/test_analytics.py
 ```
 
 ## 授權

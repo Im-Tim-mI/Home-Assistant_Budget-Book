@@ -373,7 +373,9 @@ function renderHome() {
   if (recurring.length === 0) {
     upcomingEl.innerHTML = `<div class="empty">${t('empty.no_recurring')}</div>`;
   } else {
-    const today = new Date();
+    // Compare calendar days from local midnight so a rule due today stays today
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const upcoming = recurring.map(r => {
       // 29/30/31 fall back to the last day of shorter months
       const dueIn = (year, month) => {
@@ -384,7 +386,7 @@ function renderHome() {
       if (due < today) {
         due = dueIn(today.getFullYear(), today.getMonth() + 1);
       }
-      const daysUntil = Math.ceil((due - today) / 86400000);
+      const daysUntil = Math.round((due - today) / 86400000);
       return { ...r, due, daysUntil };
     }).sort((a, b) => a.daysUntil - b.daysUntil).slice(0, 5);
 
@@ -398,7 +400,7 @@ function renderHome() {
         <div class="upcoming-row">
           <div>
             <div class="upcoming-name">${r.name} ${badge}</div>
-            <div class="upcoming-meta">${r.due.toISOString().slice(0,10)} · ${catName}</div>
+            <div class="upcoming-meta">${localDateStr(r.due)} ·${catName}</div>
           </div>
           <div class="upcoming-amount ${r.type}">${r.type === 'expense' ? '-' : '+'}${fmt(r.amount)}</div>
         </div>

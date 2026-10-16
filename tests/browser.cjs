@@ -77,6 +77,19 @@ const root = path.resolve(__dirname, '..');
     await page.locator('#rec-amount').fill('99');
     await page.locator('#rec-day').fill('1');
     await action('add_recurring', () => page.locator('#rec-submit').click());
+    // A rule due today must show today's local date and the "today" badge, not next month.
+    const now = new Date();
+    const todayLocal = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    await page.locator('#btn-add-recurring').click();
+    await page.locator('#rec-name').fill('Port due today');
+    await page.locator('#rec-amount').fill('1');
+    await page.locator('#rec-day').fill(String(now.getDate()));
+    await action('add_recurring', () => page.locator('#rec-submit').click());
+    await tab('home');
+    const dueToday = page.locator('#home-upcoming .upcoming-row').filter({ hasText: 'Port due today' });
+    await dueToday.locator('.badge-today').waitFor({ state: 'visible' });
+    assert.match(await dueToday.locator('.upcoming-meta').innerText(), new RegExp('^' + todayLocal));
+    await tab('recurring');
     await action('run_recurring', () => page.locator('#btn-run-recurring').click());
 
     await tab('settings');
